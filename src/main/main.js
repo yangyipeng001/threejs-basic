@@ -1,9 +1,8 @@
-// ! 轨道控制器学习
+// ! 目标：控制3d物体移动
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 
-// * 目标：了解three.js最基本的内容
 //* 1. 创建场景
 const scene = new THREE.Scene()
 
@@ -16,7 +15,12 @@ const scene = new THREE.Scene()
  * near — 摄像机视锥体近端面
  * far — 摄像机视锥体远端面
  */
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+)
 // 设置相机的位置（x, y, z）
 camera.position.set(0, 0, 10)
 
@@ -31,6 +35,11 @@ const cubeGeometry = new THREE.BoxGeometry(1, 1, 1)
 const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00})
 // 根据几何体和材质创建物体
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
+
+// 修改物体位置
+// cube.position.set(5, 0, 0)
+// cube.position.x = 3
+
 // 将几何体添加到场景中
 scene.add(cube)
 
@@ -54,6 +63,11 @@ scene.add(axesHelper)
 
 // 渲染函数
 function render() {
+    cube.position.x += 0.01
+    if (cube.position.x > 5) {
+        cube.position.x = 0
+    }
+
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数
     requestAnimationFrame(render)

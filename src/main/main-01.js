@@ -1,7 +1,6 @@
-// ! 基本案例学习
+// ! 目标：了解three.js最基本的内容
 import * as THREE from 'three'
 
-// * 目标：了解three.js最基本的内容
 //* 1. 创建场景
 const scene = new THREE.Scene()
 

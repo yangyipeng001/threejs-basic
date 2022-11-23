@@ -1,9 +1,8 @@
-// ! 轨道控制器学习
+// ! 目标：轨道控制器学习
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 
-// * 目标：了解three.js最基本的内容
 //* 1. 创建场景
 const scene = new THREE.Scene()
 

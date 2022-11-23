@@ -1,7 +1,5 @@
-// ! 轨道控制器学习
+// ! 基本案例学习
 import * as THREE from 'three'
-// 导入轨道控制器
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 
 // * 目标：了解three.js最基本的内容
 //* 1. 创建场景
@@ -42,20 +40,4 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.append(renderer.domElement)
 
 //* 4. 使用渲染器，通过相机将场景渲染进来
-// renderer.render(scene, camera)
-
-
-// 创建轨道控制器
-const controls = new OrbitControls(camera, renderer.domElement)
-// 创建坐标轴，红色代表X轴、绿色代表Y轴、蓝色代表Z轴
-const axesHelper = new THREE.AxesHelper(5)
-scene.add(axesHelper)
-
-
-// 渲染函数
-function render() {
-    renderer.render(scene, camera)
-    // 渲染下一帧的时候就会调用render函数
-    requestAnimationFrame(render)
-}
-render()
+renderer.render(scene, camera)

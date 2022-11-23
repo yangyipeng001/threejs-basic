@@ -3,8 +3,8 @@
 ## 搭建项目
 使用parcel
 
-[官网v1](https://www.parceljs.cn/)
-[官网v2](https://v2.parceljs.cn/blog/alpha1/)
+- [官网v1](https://www.parceljs.cn/)
+- [官网v2](https://v2.parceljs.cn/blog/alpha1/)
 ```bash
 npm init -y
 # pnpm add parcel-bundler --save-dev

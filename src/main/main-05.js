@@ -1,4 +1,4 @@
-// ! 目标：clock跟踪时间处理
+// ! 目标：requestAnimationFrame 时间参数控制物体动画
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -65,19 +65,21 @@ const controls = new OrbitControls(camera, renderer.domElement)
 const axesHelper = new THREE.AxesHelper(5)
 scene.add(axesHelper)
 
-// 设置时钟
-const clock = new THREE.Clock()
 
 // 渲染函数
-function render() {
-    // 获取时钟运行的总时长
-    let time = clock.getElapsedTime()
-    // console.log('获取时钟运行的总时长: ', time)
-    // 获取两次的间隔时间
-    // let deltaTime = clock.getDelta()
-    // console.log('获取两次的间隔时间', deltaTime)
+function render(time) {
+    // cube.position.x += 0.01
+    // cube.rotation.x += 0.01
 
-    cube.position.x = time % 5
+    // if (cube.position.x > 5) {
+    //     cube.position.x = 0
+    // }
+
+    let t = time / 1000
+    cube.position.x = t * 1 % 5
+    // if (cube.position.x > 5) {
+    //     cube.position.x = 0
+    // }
 
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数

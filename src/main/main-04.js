@@ -67,19 +67,13 @@ scene.add(axesHelper)
 
 
 // 渲染函数
-function render(time) {
-    // cube.position.x += 0.01
-    // cube.rotation.x += 0.01
+function render() {
+    cube.position.x += 0.01
+    cube.rotation.x += 0.01
 
-    // if (cube.position.x > 5) {
-    //     cube.position.x = 0
-    // }
-
-    let t = time / 1000
-    cube.position.x = t * 1 % 5
-    // if (cube.position.x > 5) {
-    //     cube.position.x = 0
-    // }
+    if (cube.position.x > 5) {
+        cube.position.x = 0
+    }
 
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数

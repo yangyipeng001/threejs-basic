@@ -1,4 +1,4 @@
-// ! 目标：控制3d物体的缩放和旋转
+// ! 目标：控制3d物体移动
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -39,11 +39,6 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
 // 修改物体位置
 // cube.position.set(5, 0, 0)
 // cube.position.x = 3
-// 缩放
-// cube.scale.set(3, 2, 1)
-// cube.scale.x = 5
-// 旋转 (x, y, z, order: string)
-// cube.rotation.set(Math.PI / 4, 0, 0)
 
 // 将几何体添加到场景中
 scene.add(cube)
@@ -67,19 +62,11 @@ scene.add(axesHelper)
 
 
 // 渲染函数
-function render(time) {
-    // cube.position.x += 0.01
-    // cube.rotation.x += 0.01
-
-    // if (cube.position.x > 5) {
-    //     cube.position.x = 0
-    // }
-
-    let t = time / 1000
-    cube.position.x = t * 1 % 5
-    // if (cube.position.x > 5) {
-    //     cube.position.x = 0
-    // }
+function render() {
+    cube.position.x += 0.01
+    if (cube.position.x > 5) {
+        cube.position.x = 0
+    }
 
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数

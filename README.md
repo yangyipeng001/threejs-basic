@@ -1,5 +1,10 @@
 # threejs-basic
 
+## 资料
+### 动画库（gsap）
+- [文档](https://greensock.com/docs/)
+- [文档指导例子](https://greensock.com/get-started/)
+
 ## 搭建项目
 使用parcel
 
@@ -9,6 +14,7 @@
 npm init -y
 # pnpm add parcel-bundler --save-dev
 pnpm add parcel --save-dev
+# 动画库安装gsap
 pnpm add three gsap dat.gui
 ```
 

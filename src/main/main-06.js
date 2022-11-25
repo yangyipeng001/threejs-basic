@@ -1,9 +1,7 @@
-// ! 目标：掌握gsap设置各种动画效果
+// ! 目标：clock跟踪时间处理
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
-// 导入动画库
-import gasp from 'gsap'
 
 //* 1. 创建场景
 const scene = new THREE.Scene()
@@ -70,40 +68,17 @@ scene.add(axesHelper)
 // 设置时钟
 const clock = new THREE.Clock()
 
-// 设置动画
-let animate1 = gasp.to(cube.position, {
-    x: 5,
-    ease: "power1.inOut",
-    duration: 5,
-    // 设置重复的次数，无限次循环：-1
-    repeat: -1,
-    // 往返运动
-    yoyo: true,
-    // delay: 延迟运动
-    delay: 2,
-    onComplete: () => {
-        console.log('动画完成')
-    },
-    onStart: () => {
-        console.log('动画开始')
-    }
-})
-gasp.to(cube.rotation, {x: 2 * Math.PI, ease: "power1.inOut", duration: 5})
-window.addEventListener('dblclick', () => {
-    // console.log('animate1', animate1)
-
-    if (animate1.isActive()) {
-        // 暂停
-        animate1.pause()
-    }
-    else {
-        // 恢复
-        animate1.resume()
-    }
-})
-
 // 渲染函数
 function render() {
+    // 获取时钟运行的总时长
+    let time = clock.getElapsedTime()
+    // console.log('获取时钟运行的总时长: ', time)
+    // 获取两次的间隔时间
+    // let deltaTime = clock.getDelta()
+    // console.log('获取两次的间隔时间', deltaTime)
+
+    cube.position.x = time % 5
+
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数
     requestAnimationFrame(render)

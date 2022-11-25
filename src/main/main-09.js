@@ -1,11 +1,9 @@
-// ! 目标：dat.gui ui界面控制库的使用
+// ! 目标：js控制画面全屏
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 // 导入动画库
 import gasp from 'gsap'
-// 导入dat.gui
-import * as dat from 'dat.gui'
 
 //* 1. 创建场景
 const scene = new THREE.Scene()
@@ -51,48 +49,6 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
 
 // 将几何体添加到场景中
 scene.add(cube)
-
-// 创建ui控制界面
-const gui = new dat.GUI()
-gui
-    .add(cube.position, 'x')
-    .min(0).max(5)
-    .step(0.01)
-    .name('移动x轴')
-    .onChange((value) => {
-        console.log('值被修改：', value)
-    })
-    .onFinishChange((value) => {
-        console.log('完全停下来：', value)
-    })
-// 修改物体的颜色
-const params = {
-    color: '#ffff00',
-    fn: () => {
-        // 让立方体运动起来
-        gasp.to(cube.position, {x: 5, duration: 2, yoyo: true, repeat: -1})
-    }
-}
-gui
-    .addColor(params, 'color')
-    .onChange((value) => {
-        // console.log('值修改为：', value)
-        cube.material.color.set(value)
-    })
-// 设置选项框
-gui
-    .add(cube, 'visible')
-    .name('是否显示')
-// 设置按钮：点击触发某个事件
-// gui
-//     .add(params, 'fn')
-//     .name('立方体运动')
-// 设置文件夹
-let folder = gui.addFolder('设置立方体')
-folder.add(cube.material, 'wireframe')
-folder
-    .add(params, 'fn')
-    .name('立方体运动')
 
 //* 3. 初始化渲染器
 const renderer = new THREE.WebGLRenderer()

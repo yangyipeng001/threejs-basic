@@ -5,6 +5,9 @@
 - [文档](https://greensock.com/docs/)
 - [文档指导例子](https://greensock.com/get-started/)
 
+### ui界面控制库
+- [dat.gui](https://www.npmjs.com/package/dat.gui)
+
 ## 搭建项目
 使用parcel
 

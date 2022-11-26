@@ -7,6 +7,6 @@ npm-debug.log
 .jshintrc
 .vs/
 node_modules
-dist
+# dist
 .cache
 .parcel-cache

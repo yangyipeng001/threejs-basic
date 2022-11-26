@@ -34,6 +34,7 @@ pnpm add three gsap dat.gui
 
 
 ## 几何体属性
+geometry
 ### BufferGeometry
 ```js
 cubeGeometry： {
@@ -49,3 +50,7 @@ cubeGeometry： {
   }
 }
 ```
+
+
+## 材质
+material

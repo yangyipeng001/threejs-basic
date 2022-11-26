@@ -1,4 +1,4 @@
-// ! 目标：打造酷炫的三角形
+// ! 目标：基础材质于纹理
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -27,38 +27,26 @@ const camera = new THREE.PerspectiveCamera(
 )
 // 设置相机的位置（x, y, z）
 camera.position.set(0, 0, 10)
-
 // 把相机添加到场景当中
 scene.add(camera)
 
+// 导入纹理
+// 纹理加载器
+const textureLoader = new THREE.TextureLoader()
+// 因为本地启动的服务是运行在dist文件夹下的index.html,所以把资料放到dist文件夹下
+const doorColorTexture = textureLoader.load('./textures/door/color.jpg')
+
 // 添加物体
-// 创建几何体
-for (let i = 0; i < 50; i++) {
-    const geometry = new THREE.BufferGeometry()
-    // 因为是缓存区数据，所以得给默认值
-    const positionArray = new Float32Array(9)
+const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1)
+// 材质
+const basicMaterial = new THREE.MeshBasicMaterial({
+    color: '#ffff00',
 
-    // 每个三角形，需要3个点， 每个点需要3个值
-    for (let j = 0; j < 9; j++) {
-        // 0~5, -5~5
-        positionArray[j] = Math.random() * 10 -5
-    }
-
-    // new THREE.BufferAttribute(vertices, 3), 每三个值作为一组
-    geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
-    // 添加材质
-    let color = new THREE.Color(Math.random(), Math.random(), Math.random())
-    const material = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.5
-    })
-    // 根据几何体和材质创建物体
-    const mesh = new THREE.Mesh(geometry, material)
-    // 把物体添加场景当中
-    scene.add(mesh)
-    console.log('mesh: ', mesh)
-}
+    // 颜色贴图
+    map: doorColorTexture,
+})
+const cube = new THREE.Mesh(cubeGeometry, basicMaterial)
+scene.add(cube)
 
 
 //* 3. 初始化渲染器

@@ -1,4 +1,4 @@
-// ! 目标：打造酷炫的三角形
+// ! 目标：BufferGeometry（缓存区几何体）设置属性
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -33,33 +33,25 @@ scene.add(camera)
 
 // 添加物体
 // 创建几何体
-for (let i = 0; i < 50; i++) {
-    const geometry = new THREE.BufferGeometry()
-    // 因为是缓存区数据，所以得给默认值
-    const positionArray = new Float32Array(9)
-
-    // 每个三角形，需要3个点， 每个点需要3个值
-    for (let j = 0; j < 9; j++) {
-        // 0~5, -5~5
-        positionArray[j] = Math.random() * 10 -5
-    }
-
-    // new THREE.BufferAttribute(vertices, 3), 每三个值作为一组
-    geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
-    // 添加材质
-    let color = new THREE.Color(Math.random(), Math.random(), Math.random())
-    const material = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.5
-    })
-    // 根据几何体和材质创建物体
-    const mesh = new THREE.Mesh(geometry, material)
-    // 把物体添加场景当中
-    scene.add(mesh)
-    console.log('mesh: ', mesh)
-}
-
+const geometry = new THREE.BufferGeometry()
+// 因为三个点构成一个面，所以矩形相当于六个点
+const vertices = new Float32Array([
+    -1.0, -1.0, 1.0,
+    1.0, -1.0, 1.0,
+    1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0,
+    -1.0, 1.0, 1.0,
+    -1.0, -1.0, 1.0
+])
+// new THREE.BufferAttribute(vertices, 3), 每三个值作为一组
+geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+// 添加材质
+const material = new THREE.MeshBasicMaterial({color: 0xffff00})
+// 根据几何体和材质创建物体
+const mesh = new THREE.Mesh(geometry, material)
+// 把物体添加场景当中
+scene.add(mesh)
+console.log('mesh: ', mesh)
 
 //* 3. 初始化渲染器
 const renderer = new THREE.WebGLRenderer()

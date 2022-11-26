@@ -52,6 +52,10 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
 // 将几何体添加到场景中
 scene.add(cube)
 
+// 打印几何体属性
+console.log('cubeGeometry: ', cubeGeometry)
+console.log('cube: ', cube)
+
 // 创建ui控制界面
 const gui = new dat.GUI()
 gui

@@ -1,4 +1,4 @@
-// ! 目标：透明纹理
+// ! 目标：基础材质于纹理
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -35,38 +35,18 @@ scene.add(camera)
 const textureLoader = new THREE.TextureLoader()
 // 因为本地启动的服务是运行在dist文件夹下的index.html,所以把资料放到dist文件夹下
 const doorColorTexture = textureLoader.load('./textures/door/color.jpg')
-const doorAlphaTexture = textureLoader.load('./textures/door/alpha.jpg')
-
 
 // 添加物体
 const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1)
 // 材质
 const basicMaterial = new THREE.MeshBasicMaterial({
     color: '#ffff00',
+
     // 颜色贴图
     map: doorColorTexture,
-    // alpha贴图是一张灰度纹理，用于控制整个表面的不透明度。
-    // alphaMap: doorAlphaTexture,
-    // 材质是否透明
-    transparent: true,
-    // 透明度
-    opacity: 0.3,
-    // 渲染哪一面，默认前面
-    side: THREE.DoubleSide
 })
-const cube = new THREE.Mesh(
-    cubeGeometry,
-    basicMaterial
-)
+const cube = new THREE.Mesh(cubeGeometry, basicMaterial)
 scene.add(cube)
-
-// 添加平面
-const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(1, 1),
-    basicMaterial
-)
-plane.position.set(3, 0, 0)
-scene.add(plane)
 
 
 //* 3. 初始化渲染器

@@ -532,7 +532,7 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"7gecy":[function(require,module,exports) {
-// ! 目标：透明纹理
+// ! 目标：标准网络材质（MeshStandardMaterial）
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _three = require("three");
 // 导入轨道控制器
@@ -563,28 +563,47 @@ const textureLoader = new _three.TextureLoader();
 // 因为本地启动的服务是运行在dist文件夹下的index.html,所以把资料放到dist文件夹下
 const doorColorTexture = textureLoader.load("./textures/door/color.jpg");
 const doorAlphaTexture = textureLoader.load("./textures/door/alpha.jpg");
+const doorAoTexture = textureLoader.load("./textures/door/ambientOcclusion.jpg");
 // 添加物体
 const cubeGeometry = new _three.BoxBufferGeometry(1, 1, 1);
 // 材质
-const basicMaterial = new _three.MeshBasicMaterial({
+const material = new _three.MeshStandardMaterial({
     color: "#ffff00",
     // 颜色贴图
     map: doorColorTexture,
     // alpha贴图是一张灰度纹理，用于控制整个表面的不透明度。
-    // alphaMap: doorAlphaTexture,
+    alphaMap: doorAlphaTexture,
     // 材质是否透明
     transparent: true,
-    // 透明度
-    opacity: 0.3,
-    // 渲染哪一面，默认前面
-    side: _three.DoubleSide
+    // 环境遮挡贴图
+    aoMap: doorAoTexture,
+    // 环境遮挡效果的强度
+    aoMapIntensity: 0.5
 });
-const cube = new _three.Mesh(cubeGeometry, basicMaterial);
+material.side = _three.DoubleSide;
+const cube = new _three.Mesh(cubeGeometry, material);
 scene.add(cube);
+// 给cube设置第二组uv
+cubeGeometry.setAttribute("uv2", new _three.BufferAttribute(cubeGeometry.attributes.uv.array, 2));
 // 添加平面
-const plane = new _three.Mesh(new _three.PlaneBufferGeometry(1, 1), basicMaterial);
+const planeGeometry = new _three.PlaneBufferGeometry(1, 1);
+const plane = new _three.Mesh(planeGeometry, material);
 plane.position.set(3, 0, 0);
 scene.add(plane);
+// 给平面设置第二组uv
+planeGeometry.setAttribute("uv2", new _three.BufferAttribute(planeGeometry.attributes.uv.array, 2));
+// 灯光
+/**
+ * 环境光（AmbientLight 参数）
+ * color - (参数可选）颜色的rgb数值。缺省值为 0xffffff
+ * intensity - (参数可选)光照的强度。缺省值为 1。
+ */ const light = new _three.AmbientLight(0xffffff, 0.5);
+scene.add(light);
+// 直线光源
+// 平行光（DirectionalLight）
+const directionalLight = new _three.DirectionalLight(0xffffff, 0.5);
+directionalLight.position.set(10, 10, 10);
+scene.add(directionalLight);
 //* 3. 初始化渲染器
 const renderer = new _three.WebGLRenderer();
 // 设置渲染的尺寸大小

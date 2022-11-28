@@ -1,4 +1,4 @@
-// ! 目标：标准网络材质（MeshStandardMaterial）
+// ! 目标：AO环境遮挡贴图
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -42,7 +42,7 @@ const doorAoTexture = textureLoader.load('./textures/door/ambientOcclusion.jpg')
 // 添加物体
 const cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1)
 // 材质
-const material = new THREE.MeshStandardMaterial({
+const basicMaterial = new THREE.MeshBasicMaterial({
     color: '#ffff00',
     // 颜色贴图
     map: doorColorTexture,
@@ -60,10 +60,10 @@ const material = new THREE.MeshStandardMaterial({
     // 渲染哪一面，默认前面
     // side: THREE.DoubleSide,
 })
-material.side = THREE.DoubleSide
+basicMaterial.side = THREE.DoubleSide
 const cube = new THREE.Mesh(
     cubeGeometry,
-    material
+    basicMaterial
 )
 scene.add(cube)
 // 给cube设置第二组uv
@@ -76,7 +76,7 @@ cubeGeometry.setAttribute(
 const planeGeometry = new THREE.PlaneBufferGeometry(1, 1)
 const plane = new THREE.Mesh(
     planeGeometry,
-    material
+    basicMaterial
 )
 plane.position.set(3, 0, 0)
 scene.add(plane)
@@ -85,21 +85,6 @@ planeGeometry.setAttribute(
     'uv2',
     new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2)
 )
-
-
-// 灯光
-/**
- * 环境光（AmbientLight 参数）
- * color - (参数可选）颜色的rgb数值。缺省值为 0xffffff
- * intensity - (参数可选)光照的强度。缺省值为 1。
- */
-const light = new THREE.AmbientLight(0xffffff, 0.5)
-scene.add(light)
-// 直线光源
-// 平行光（DirectionalLight）
-const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-directionalLight.position.set(10, 10, 10)
-scene.add( directionalLight );
 
 
 //* 3. 初始化渲染器

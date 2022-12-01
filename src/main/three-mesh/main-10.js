@@ -1,4 +1,4 @@
-// ! 目标：加载进度
+// ! 目标：标准网络材质（MeshStandardMaterial）- 粗糙度、金属度、法线贴图
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -30,52 +30,11 @@ camera.position.set(0, 0, 10)
 // 把相机添加到场景当中
 scene.add(camera)
 
-// 创建div
-var div = document.createElement('div')
-div.style.width = '200px'
-div.style.height = '200px'
-div.style.position = 'fixed'
-div.style.top = 0
-div.style.right = 0
-div.style.color = '#fff'
-document.body.appendChild(div)
-
-// 单张纹理图的加载
-let event = {
-    onLoad: function() {
-        console.log('图片加载完成')
-    },
-    onProgress: function(url, num, total) {
-        console.log('图片加载完成：', url)
-        console.log('图片加载进度：', num)
-        console.log('图片总数：', total)
-        let value = ((num / total) * 100).toFixed(2) + '%'
-        console.log('加载进度的百分比：', value)
-        div.innerHTML = value
-    },
-    onError: function(e) {
-        console.log(e)
-        console.log('图片加载出现错误')
-    }
-}
-
-// 设置加载管理器
-const loadingManager = new THREE.LoadingManager(
-    event.onLoad,
-    event.onProgress,
-    event.onError
-)
-
 // 导入纹理
 // 纹理加载器
-const textureLoader = new THREE.TextureLoader(loadingManager)
+const textureLoader = new THREE.TextureLoader()
 // 因为本地启动的服务是运行在dist文件夹下的index.html,所以把资料放到dist文件夹下
-const doorColorTexture = textureLoader.load(
-    './textures/door/color.jpg',
-    // event.onLoad,
-    // event.onProgress,
-    // event.onError,
-)
+const doorColorTexture = textureLoader.load('./textures/door/color.jpg')
 const doorAlphaTexture = textureLoader.load('./textures/door/alpha.jpg')
 const doorAoTexture = textureLoader.load('./textures/door/ambientOcclusion.jpg')
 // 导入置换贴图

@@ -179,3 +179,11 @@ material
 - 灯光部分由：直接照明、间接照明、直接高光、间接高光、阴影、环境光闭塞来定义照明属性的
 - 通常我们写材质的时候只需要关注材质部分的属性即可，灯光属性都是引擎定义好的直接使用即可
 - PBR渲染模型不但指的是PBR材质，还有灯光，两者缺一不可
+
+
+## 贴图资料网站
+- [poliigon](https://www.poliigon.com/)
+- [3dtextures](https://3dtextures.me/)
+- [arroway-textures](https://www.arroway-textures.ch/)
+- Quixel Bridge 软件
+  - 得注册一个虚幻引擎的账号，登录账号后，所有贴图都是免费的。

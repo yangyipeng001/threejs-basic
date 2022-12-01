@@ -532,7 +532,7 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"7gecy":[function(require,module,exports) {
-// ! 目标：标准网络材质（MeshStandardMaterial）
+// ! 目标：加载进度
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _three = require("three");
 // 导入轨道控制器
@@ -557,15 +557,52 @@ const scene = new _three.Scene();
 camera.position.set(0, 0, 10);
 // 把相机添加到场景当中
 scene.add(camera);
+// 创建div
+var div = document.createElement("div");
+div.style.width = "200px";
+div.style.height = "200px";
+div.style.position = "fixed";
+div.style.top = 0;
+div.style.right = 0;
+div.style.color = "#fff";
+document.body.appendChild(div);
+// 单张纹理图的加载
+let event = {
+    onLoad: function() {
+        console.log("图片加载完成");
+    },
+    onProgress: function(url, num, total) {
+        console.log("图片加载完成：", url);
+        console.log("图片加载进度：", num);
+        console.log("图片总数：", total);
+        let value = (num / total * 100).toFixed(2) + "%";
+        console.log("加载进度的百分比：", value);
+        div.innerHTML = value;
+    },
+    onError: function(e) {
+        console.log(e);
+        console.log("图片加载出现错误");
+    }
+};
+// 设置加载管理器
+const loadingManager = new _three.LoadingManager(event.onLoad, event.onProgress, event.onError);
 // 导入纹理
 // 纹理加载器
-const textureLoader = new _three.TextureLoader();
+const textureLoader = new _three.TextureLoader(loadingManager);
 // 因为本地启动的服务是运行在dist文件夹下的index.html,所以把资料放到dist文件夹下
 const doorColorTexture = textureLoader.load("./textures/door/color.jpg");
 const doorAlphaTexture = textureLoader.load("./textures/door/alpha.jpg");
 const doorAoTexture = textureLoader.load("./textures/door/ambientOcclusion.jpg");
+// 导入置换贴图
+const doorHeightTexture = textureLoader.load("./textures/door/height.jpg");
+// 导入粗糙度贴图
+const roughnessTexture = textureLoader.load("./textures/door/roughness.jpg");
+// 导入金属贴图
+const metalnessTexture = textureLoader.load("./textures/door/metalness.jpg");
+// 导入法线贴图
+const normalTexture = textureLoader.load("./textures/door/normal.jpg");
 // 添加物体
-const cubeGeometry = new _three.BoxBufferGeometry(1, 1, 1);
+const cubeGeometry = new _three.BoxBufferGeometry(1, 1, 1, 100, 100, 100);
 // 材质
 const material = new _three.MeshStandardMaterial({
     color: "#ffff00",
@@ -578,7 +615,21 @@ const material = new _three.MeshStandardMaterial({
     // 环境遮挡贴图
     aoMap: doorAoTexture,
     // 环境遮挡效果的强度
-    aoMapIntensity: 0.5
+    aoMapIntensity: 0.5,
+    // 置换贴图（位移贴图会影响网格顶点的位置）
+    displacementMap: doorHeightTexture,
+    // 位移贴图对网格的影响程度（黑色是无位移，白色是最大位移）
+    displacementScale: 0.1,
+    // 材质的粗糙程度
+    roughness: 1,
+    // 该纹理的绿色通道用于改变材质的粗糙度
+    roughnessMap: roughnessTexture,
+    // 材质与金属的相似度
+    metalness: 1,
+    // 该纹理的蓝色通道用于改变材质的金属度
+    metalnessMap: metalnessTexture,
+    // 用于创建法线贴图的纹理
+    normalMap: normalTexture
 });
 material.side = _three.DoubleSide;
 const cube = new _three.Mesh(cubeGeometry, material);
@@ -586,9 +637,9 @@ scene.add(cube);
 // 给cube设置第二组uv
 cubeGeometry.setAttribute("uv2", new _three.BufferAttribute(cubeGeometry.attributes.uv.array, 2));
 // 添加平面
-const planeGeometry = new _three.PlaneBufferGeometry(1, 1);
+const planeGeometry = new _three.PlaneBufferGeometry(1, 1, 200, 200);
 const plane = new _three.Mesh(planeGeometry, material);
-plane.position.set(3, 0, 0);
+plane.position.set(1.5, 0, 0);
 scene.add(plane);
 // 给平面设置第二组uv
 planeGeometry.setAttribute("uv2", new _three.BufferAttribute(planeGeometry.attributes.uv.array, 2));

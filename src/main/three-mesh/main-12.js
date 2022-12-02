@@ -1,4 +1,4 @@
-// ! 目标：经纬线映射贴图与HDR
+// ! 目标：环境贴图
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -6,19 +6,6 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import gasp from 'gsap'
 // 导入dat.gui
 import * as dat from 'dat.gui'
-// 加载RGBELoader 加载器
-import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader'
-
-// 加载hdr环境图
-const rgbeLoader = new RGBELoader()
-rgbeLoader.loadAsync('textures/hdr/002.hdr').then((texture) => {
-    // 图像将如何应用到物体（对象）上
-    // EquirectangularReflectionMapping: 用于等距圆柱投影的环境贴图，也被叫做经纬线映射贴图
-    texture.mapping = THREE.EquirectangularReflectionMapping
-
-    scene.background = texture
-    scene.environment = texture
-})
 
 //* 1. 创建场景
 const scene = new THREE.Scene()
@@ -64,15 +51,10 @@ const material = new THREE.MeshStandardMaterial({
     roughness: 0.1,
 
     // 环境贴图
-    // envMap: envMapTexture,
+    envMap: envMapTexture,
 })
 const sphere = new THREE.Mesh(sphereGeometry, material)
 scene.add(sphere)
-
-// 给场景添加背景
-scene.background = envMapTexture
-// 给场景所有的物体添加默认的环境贴图
-scene.environment = envMapTexture
 
 // 灯光
 /**

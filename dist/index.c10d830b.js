@@ -532,7 +532,7 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"7gecy":[function(require,module,exports) {
-// ! 目标：经纬线映射贴图与HDR
+// ! 目标：点光源
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _three = require("three");
 // 导入轨道控制器
@@ -544,15 +544,13 @@ var _gsapDefault = parcelHelpers.interopDefault(_gsap);
 var _datGui = require("dat.gui");
 // 加载RGBELoader 加载器
 var _rgbeloader = require("three/examples/jsm/loaders/RGBELoader");
-// 加载hdr环境图
-const rgbeLoader = new (0, _rgbeloader.RGBELoader)();
-rgbeLoader.loadAsync("textures/hdr/002.hdr").then((texture)=>{
-    // 图像将如何应用到物体（对象）上
-    // EquirectangularReflectionMapping: 用于等距圆柱投影的环境贴图，也被叫做经纬线映射贴图
-    texture.mapping = _three.EquirectangularReflectionMapping;
-    scene.background = texture;
-    scene.environment = texture;
-});
+// 灯光与阴影
+// 1、材质要满足能够对光照有反应
+// 2、设置渲染器开启阴影的计算 renderer.shadowMap.enabled = true
+// 3、设置光照投射阴影 directionalLight.castShadow = true
+// 4、设置物体投射阴影 sphere.castShadow = true
+// 5、设置物体接收阴影 plane.receiveShadow = true
+const gui = new _datGui.GUI();
 //* 1. 创建场景
 const scene = new _three.Scene();
 //* 2. 创建相机 PerspectiveCamera: 透视相机
@@ -568,30 +566,22 @@ const scene = new _three.Scene();
 camera.position.set(0, 0, 10);
 // 把相机添加到场景当中
 scene.add(camera);
-// 设置cube纹理加载器
-const cubeTextureLoader = new _three.CubeTextureLoader();
-const envMapTexture = cubeTextureLoader.load([
-    "textures/environmentMaps/1/px.jpg",
-    "textures/environmentMaps/1/nx.jpg",
-    "textures/environmentMaps/1/py.jpg",
-    "textures/environmentMaps/1/ny.jpg",
-    "textures/environmentMaps/1/pz.jpg",
-    "textures/environmentMaps/1/nz.jpg"
-]);
 // 创建球体
 const sphereGeometry = new _three.SphereBufferGeometry(1, 20, 20);
 const material = new _three.MeshStandardMaterial({
-    // 金属度
-    metalness: 0.7,
-    // 粗糙度
-    roughness: 0.1
 });
 const sphere = new _three.Mesh(sphereGeometry, material);
+// 投射阴影
+sphere.castShadow = true;
 scene.add(sphere);
-// 给场景添加背景
-scene.background = envMapTexture;
-// 给场景所有的物体添加默认的环境贴图
-scene.environment = envMapTexture;
+// 创建平面
+const planeGeometry = new _three.PlaneBufferGeometry(50, 50);
+const plane = new _three.Mesh(planeGeometry, material);
+plane.position.set(0, -1, 0);
+plane.rotation.x = -Math.PI / 2;
+// 接收阴影
+plane.receiveShadow = true;
+scene.add(plane);
 // 灯光
 /**
  * 环境光（AmbientLight 参数）
@@ -599,15 +589,34 @@ scene.environment = envMapTexture;
  * intensity - (参数可选)光照的强度。缺省值为 1。
  */ const light = new _three.AmbientLight(0xffffff, 0.5);
 scene.add(light);
-// 直线光源
-// 平行光（DirectionalLight）
-const directionalLight = new _three.DirectionalLight(0xffffff, 0.5);
-directionalLight.position.set(10, 10, 10);
-scene.add(directionalLight);
+// 创建一个小球，绑定点光源
+const smallBall = new _three.Mesh(new _three.SphereBufferGeometry(0.1, 20, 20), new _three.MeshBasicMaterial({
+    color: 0xff0000
+}));
+smallBall.position.set(2, 2, 2);
+// 聚光源
+const pointLight = new _three.PointLight(0xff0000, 1);
+// pointLight.position.set(2, 2, 2)
+// 聚光灯将投射阴影
+pointLight.castShadow = true;
+// 设置阴影贴图模糊度
+pointLight.shadow.radius = 20;
+// 设置阴影贴图的分辨率
+pointLight.shadow.mapSize.set(2048, 2048);
+// scene.add(pointLight);
+smallBall.add(pointLight);
+scene.add(smallBall);
+gui.add(pointLight.position, "x").min(-5).max(5).step(0.1);
+gui.add(pointLight, "distance").min(0).max(5).step(0.001);
+gui.add(pointLight, "decay").min(0).max(5).step(0.01);
 //* 3. 初始化渲染器
 const renderer = new _three.WebGLRenderer();
 // 设置渲染的尺寸大小
 renderer.setSize(window.innerWidth, window.innerHeight);
+// 开启场景中的阴影贴图
+renderer.shadowMap.enabled = true;
+// 是否使用物理上正确的光照模式
+renderer.physicallyCorrectLights = true;
 // 将webgl渲染的canvas内容添加到body
 document.body.append(renderer.domElement);
 //* 4. 使用渲染器，通过相机将场景渲染进来
@@ -631,6 +640,10 @@ window.addEventListener("dblclick", ()=>{
 });
 // 渲染函数
 function render() {
+    const time = clock.getElapsedTime();
+    smallBall.position.x = Math.sin(time) * 3;
+    smallBall.position.z = Math.cos(time) * 3;
+    smallBall.position.y = 2 + Math.sin(time * 10) / 2;
     controls.update();
     renderer.render(scene, camera);
     // 渲染下一帧的时候就会调用render函数

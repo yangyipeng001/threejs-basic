@@ -1,4 +1,4 @@
-// ! 目标：点光源
+// ! 目标：聚光灯
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -75,39 +75,53 @@ scene.add(plane)
  */
 const light = new THREE.AmbientLight(0xffffff, 0.5)
 scene.add(light)
-
-// 创建一个小球，绑定点光源
-const smallBall = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.1, 20, 20),
-    new THREE.MeshBasicMaterial({color: 0xff0000})
-)
-smallBall.position.set(2, 2, 2)
-
 // 聚光源
-const pointLight = new THREE.PointLight( 0xff0000, 1);
-// pointLight.position.set(2, 2, 2)
+const spotLight = new THREE.SpotLight( 0xffffff, 1);
+spotLight.position.set(5, 5, 5)
 // 聚光灯将投射阴影
-pointLight.castShadow = true
+spotLight.castShadow = true
 // 设置阴影贴图模糊度
-pointLight.shadow.radius = 20
+spotLight.shadow.radius = 20
 // 设置阴影贴图的分辨率
-pointLight.shadow.mapSize.set(2048, 2048)
+spotLight.shadow.mapSize.set(2048, 2048)
+// 聚光灯的方向是从它的位置到目标位置.默认的目标位置为原点 (0,0,0)
+spotLight.target = sphere
+// 从聚光灯的位置以弧度表示聚光灯的最大范围
+spotLight.angle = Math.PI / 6
+// 从光源发出光的最大距离，其强度根据光源的距离线性衰减
+spotLight.distance = 0
+// 聚光锥的半影衰减百分比。在0和1之间的值
+spotLight.penumbra = 0
+// 沿着光照距离的衰减量
+spotLight.decay = 0
+// 光照强度
+spotLight.intensity = 2
 
-// scene.add(pointLight);
-smallBall.add(pointLight)
-scene.add(smallBall);
+// 设置透射相机的属性
+
+scene.add( spotLight );
 gui
-    .add(pointLight.position, 'x')
+    .add(sphere.position, 'x')
     .min(-5)
     .max(5)
     .step(0.1)
 gui
-    .add(pointLight, 'distance')
+    .add(spotLight, 'angle')
     .min(0)
-    .max(5)
-    .step(0.001)
+    .max(Math.PI)
+    .step(0.01)
 gui
-    .add(pointLight, 'decay')
+    .add(spotLight, 'distance')
+    .min(0)
+    .max(10)
+    .step(0.01)
+gui
+    .add(spotLight, 'penumbra')
+    .min(0)
+    .max(1)
+    .step(0.01)
+gui
+    .add(spotLight, 'decay')
     .min(0)
     .max(5)
     .step(0.01)
@@ -156,11 +170,6 @@ window.addEventListener('dblclick', () => {
 
 // 渲染函数
 function render() {
-    const time = clock.getElapsedTime()
-    smallBall.position.x = Math.sin(time) * 3
-    smallBall.position.z = Math.cos(time) * 3
-    smallBall.position.y = 2 + Math.sin(time * 10) / 2
-
     controls.update()
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数

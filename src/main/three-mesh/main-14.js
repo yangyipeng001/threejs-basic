@@ -1,4 +1,4 @@
-// ! 目标：点光源
+// ! 目标：灯光与阴影
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -15,8 +15,6 @@ import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader'
 // 3、设置光照投射阴影 directionalLight.castShadow = true
 // 4、设置物体投射阴影 sphere.castShadow = true
 // 5、设置物体接收阴影 plane.receiveShadow = true
-
-const gui = new dat.GUI()
 
 //* 1. 创建场景
 const scene = new THREE.Scene()
@@ -59,7 +57,7 @@ sphere.castShadow = true
 scene.add(sphere)
 
 // 创建平面
-const planeGeometry = new THREE.PlaneBufferGeometry(50, 50)
+const planeGeometry = new THREE.PlaneBufferGeometry(10, 10)
 const plane = new THREE.Mesh(planeGeometry, material)
 plane.position.set(0, -1, 0)
 plane.rotation.x = -Math.PI / 2
@@ -75,42 +73,13 @@ scene.add(plane)
  */
 const light = new THREE.AmbientLight(0xffffff, 0.5)
 scene.add(light)
-
-// 创建一个小球，绑定点光源
-const smallBall = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.1, 20, 20),
-    new THREE.MeshBasicMaterial({color: 0xff0000})
-)
-smallBall.position.set(2, 2, 2)
-
-// 聚光源
-const pointLight = new THREE.PointLight( 0xff0000, 1);
-// pointLight.position.set(2, 2, 2)
-// 聚光灯将投射阴影
-pointLight.castShadow = true
-// 设置阴影贴图模糊度
-pointLight.shadow.radius = 20
-// 设置阴影贴图的分辨率
-pointLight.shadow.mapSize.set(2048, 2048)
-
-// scene.add(pointLight);
-smallBall.add(pointLight)
-scene.add(smallBall);
-gui
-    .add(pointLight.position, 'x')
-    .min(-5)
-    .max(5)
-    .step(0.1)
-gui
-    .add(pointLight, 'distance')
-    .min(0)
-    .max(5)
-    .step(0.001)
-gui
-    .add(pointLight, 'decay')
-    .min(0)
-    .max(5)
-    .step(0.01)
+// 直线光源
+// 平行光（DirectionalLight）
+const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+directionalLight.position.set(10, 10, 10)
+// 平行光会产生动态阴影
+directionalLight.castShadow = true
+scene.add( directionalLight );
 
 
 //* 3. 初始化渲染器
@@ -119,8 +88,6 @@ const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
 // 开启场景中的阴影贴图
 renderer.shadowMap.enabled = true
-// 是否使用物理上正确的光照模式
-renderer.physicallyCorrectLights = true
 // 将webgl渲染的canvas内容添加到body
 document.body.append(renderer.domElement)
 
@@ -156,11 +123,6 @@ window.addEventListener('dblclick', () => {
 
 // 渲染函数
 function render() {
-    const time = clock.getElapsedTime()
-    smallBall.position.x = Math.sin(time) * 3
-    smallBall.position.z = Math.cos(time) * 3
-    smallBall.position.y = 2 + Math.sin(time * 10) / 2
-
     controls.update()
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数

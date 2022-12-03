@@ -1,4 +1,4 @@
-// ! 目标：点光源
+// ! 目标：经纬线映射贴图与HDR
 import * as THREE from 'three'
 // 导入轨道控制器
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
@@ -9,14 +9,16 @@ import * as dat from 'dat.gui'
 // 加载RGBELoader 加载器
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader'
 
-// 灯光与阴影
-// 1、材质要满足能够对光照有反应
-// 2、设置渲染器开启阴影的计算 renderer.shadowMap.enabled = true
-// 3、设置光照投射阴影 directionalLight.castShadow = true
-// 4、设置物体投射阴影 sphere.castShadow = true
-// 5、设置物体接收阴影 plane.receiveShadow = true
+// 加载hdr环境图
+const rgbeLoader = new RGBELoader()
+rgbeLoader.loadAsync('textures/hdr/002.hdr').then((texture) => {
+    // 图像将如何应用到物体（对象）上
+    // EquirectangularReflectionMapping: 用于等距圆柱投影的环境贴图，也被叫做经纬线映射贴图
+    texture.mapping = THREE.EquirectangularReflectionMapping
 
-const gui = new dat.GUI()
+    scene.background = texture
+    scene.environment = texture
+})
 
 //* 1. 创建场景
 const scene = new THREE.Scene()
@@ -41,31 +43,36 @@ camera.position.set(0, 0, 10)
 // 把相机添加到场景当中
 scene.add(camera)
 
+// 设置cube纹理加载器
+const cubeTextureLoader = new THREE.CubeTextureLoader()
+const envMapTexture = cubeTextureLoader.load([
+    'textures/environmentMaps/1/px.jpg',
+    'textures/environmentMaps/1/nx.jpg',
+    'textures/environmentMaps/1/py.jpg',
+    'textures/environmentMaps/1/ny.jpg',
+    'textures/environmentMaps/1/pz.jpg',
+    'textures/environmentMaps/1/nz.jpg',
+])
+
 // 创建球体
 const sphereGeometry = new THREE.SphereBufferGeometry(1, 20, 20)
 const material = new THREE.MeshStandardMaterial({
     // 金属度
-    // metalness: 0.7,
+    metalness: 0.7,
 
     // 粗糙度
-    // roughness: 0.1,
+    roughness: 0.1,
 
     // 环境贴图
     // envMap: envMapTexture,
 })
 const sphere = new THREE.Mesh(sphereGeometry, material)
-// 投射阴影
-sphere.castShadow = true
 scene.add(sphere)
 
-// 创建平面
-const planeGeometry = new THREE.PlaneBufferGeometry(50, 50)
-const plane = new THREE.Mesh(planeGeometry, material)
-plane.position.set(0, -1, 0)
-plane.rotation.x = -Math.PI / 2
-// 接收阴影
-plane.receiveShadow = true
-scene.add(plane)
+// 给场景添加背景
+scene.background = envMapTexture
+// 给场景所有的物体添加默认的环境贴图
+scene.environment = envMapTexture
 
 // 灯光
 /**
@@ -75,52 +82,17 @@ scene.add(plane)
  */
 const light = new THREE.AmbientLight(0xffffff, 0.5)
 scene.add(light)
-
-// 创建一个小球，绑定点光源
-const smallBall = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.1, 20, 20),
-    new THREE.MeshBasicMaterial({color: 0xff0000})
-)
-smallBall.position.set(2, 2, 2)
-
-// 聚光源
-const pointLight = new THREE.PointLight( 0xff0000, 1);
-// pointLight.position.set(2, 2, 2)
-// 聚光灯将投射阴影
-pointLight.castShadow = true
-// 设置阴影贴图模糊度
-pointLight.shadow.radius = 20
-// 设置阴影贴图的分辨率
-pointLight.shadow.mapSize.set(2048, 2048)
-
-// scene.add(pointLight);
-smallBall.add(pointLight)
-scene.add(smallBall);
-gui
-    .add(pointLight.position, 'x')
-    .min(-5)
-    .max(5)
-    .step(0.1)
-gui
-    .add(pointLight, 'distance')
-    .min(0)
-    .max(5)
-    .step(0.001)
-gui
-    .add(pointLight, 'decay')
-    .min(0)
-    .max(5)
-    .step(0.01)
+// 直线光源
+// 平行光（DirectionalLight）
+const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+directionalLight.position.set(10, 10, 10)
+scene.add( directionalLight );
 
 
 //* 3. 初始化渲染器
 const renderer = new THREE.WebGLRenderer()
 // 设置渲染的尺寸大小
 renderer.setSize(window.innerWidth, window.innerHeight)
-// 开启场景中的阴影贴图
-renderer.shadowMap.enabled = true
-// 是否使用物理上正确的光照模式
-renderer.physicallyCorrectLights = true
 // 将webgl渲染的canvas内容添加到body
 document.body.append(renderer.domElement)
 
@@ -156,11 +128,6 @@ window.addEventListener('dblclick', () => {
 
 // 渲染函数
 function render() {
-    const time = clock.getElapsedTime()
-    smallBall.position.x = Math.sin(time) * 3
-    smallBall.position.z = Math.cos(time) * 3
-    smallBall.position.y = 2 + Math.sin(time * 10) / 2
-
     controls.update()
     renderer.render(scene, camera)
     // 渲染下一帧的时候就会调用render函数

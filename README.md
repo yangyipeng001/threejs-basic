@@ -189,5 +189,11 @@ material
   - 得注册一个虚幻引擎的账号，登录账号后，所有贴图都是免费的。
 
 
+## 点材质贴图网站
+- [particle-pack](https://kenney.nl/assets/particle-pack)
+- [iconfont](https://iconfont.cn)
+- [aigei](https://www.aigei.com/)
+
+
 ## HDR详解
 HDR技术是一种改善动态对比度的技术。 

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "parcel src/index.html",
+    "start": "parcel src/three-full-scroll.html",
     "build": "parcel build src/index.html"
   },
   "keywords": [],

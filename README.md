@@ -21,6 +21,10 @@ npm init -y
 pnpm add parcel --save-dev
 # 动画库安装gsap
 pnpm add three gsap dat.gui
+
+# 着色器shader
+# 目前是用parcelv1
+pnpm add parcel-bundler glslify-bundle glslify-deps --save-dev
 ```
 
 ```js

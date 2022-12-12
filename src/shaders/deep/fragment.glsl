@@ -4,6 +4,19 @@ uniform float uTime;
 
 varying vec2 vUv;
 
+// 随机函数
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+// 旋转函数
+vec2 rotate(vec2 uv, float rotation, vec2 mid) {
+    return vec2(
+        cos(rotation) * (uv.x - mid.x) + sin(rotation) * (uv.y - mid.y) + mid.x,
+        cos(rotation) * (uv.y - mid.y) - sin(rotation) * (uv.x - mid.x) + mid.y
+    );
+}
+
 void main(){
     // 1. 通过顶点对应的uv，决定每一个像素在uv图像的位置，通过这个位置(x, y)决定颜色
     // gl_FragColor = vec4(vUv, 0.0, 1.0);
@@ -81,6 +94,78 @@ void main(){
     // float strength = abs(vUv.x - 0.5);
     // gl_FragColor = vec4(strength, strength, strength, 1);
 
-     float strength = min(abs(vUv.x - 0.5), abs(vUv.y - 0.5));
-    gl_FragColor = vec4(strength, strength, strength, 1);
+    // 17 去2个值的最小值
+    // float strength = min(abs(vUv.x - 0.5), abs(vUv.y - 0.5));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 18 去2个值的最大值
+    // float strength = max(abs(vUv.x - 0.5), abs(vUv.y - 0.5));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 19 step
+    // float strength = step(0.2, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 20 小正方形
+    // float strength = 1.0 - step(0.2, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 21. 利用取整，实现条纹渐变
+    // float strength = floor(vUv.x * 10.0) / 10.0;
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // float strength = floor(vUv.y * 10.0) / 10.0;
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 22. 条纹相乘，实现渐变格子
+    // float strength = floor(vUv.x * 10.0) / 10.0 * floor(vUv.y * 10.0) / 10.0;
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 23. 向上取整
+    // float strength = ceil(vUv.x * 10.0) / 10.0 * ceil(vUv.y * 10.0) / 10.0;
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 24. 随机效果
+    // float strength = random(vUv);
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 24. 随机 + 格子效果
+    // float strength = ceil(vUv.x * 10.0) / 10.0 * ceil(vUv.y * 10.0) / 10.0;
+    // strength = random(vec2(strength, strength));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 25. 依据length返回向量长度
+    // float strength = length(vUv);
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 26. 根据distance计算两个向量的距离
+    // float strength = 1.0 - distance(vUv, vec2(0.5, 0.5));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 27. 根据相处除，实现星星
+    // float strength = 0.15 / distance(vUv, vec2(0.5, 0.5));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 28. 设置vUv水平或者竖直变量
+    // float strength = 0.15 / distance(vec2(vUv.x, (vUv.y - 0.5) * 5.0), vec2(0.5, 0.5)) - 1.0;
+    // gl_FragColor = vec4(strength, strength, strength, strength);
+
+    // float strength = 0.15 / distance(vec2(vUv.x, (vUv.y + 0.5)), vec2(0.5, 0.5)) - 1.0;
+    // gl_FragColor = vec4(strength, strength, strength, strength);
+
+    // 29. 十字交叉的星星
+    // float strength = 0.15 / distance(vec2(vUv.x, (vUv.y - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    // strength *= 0.15 / distance(vec2(vUv.y, (vUv.x - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    // gl_FragColor = vec4(strength, strength, strength, 1.0);
+
+    // float strength = 0.15 / distance(vec2(vUv.x, (vUv.y - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    // strength += 0.15 / distance(vec2(vUv.y, (vUv.x - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    // gl_FragColor = vec4(strength, strength, strength, strength);
+
+    // 29. 旋转飞镖， 旋转uv
+    // vec2 rotateUv = rotate(vUv, 3.14 * 0.25, vec2(0.5));
+    vec2 rotateUv = rotate(vUv, -uTime * 5.0, vec2(0.5));
+    float strength = 0.15 / distance(vec2(rotateUv.x, (rotateUv.y - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    strength += 0.15 / distance(vec2(rotateUv.y, (rotateUv.x - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    gl_FragColor = vec4(strength, strength, strength, strength);
 }

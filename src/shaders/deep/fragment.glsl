@@ -4,6 +4,9 @@ uniform float uTime;
 
 varying vec2 vUv;
 
+// 定义
+#define PI 3.1415926535897932384626433832795
+
 // 随机函数
 float random(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -164,8 +167,90 @@ void main(){
 
     // 29. 旋转飞镖， 旋转uv
     // vec2 rotateUv = rotate(vUv, 3.14 * 0.25, vec2(0.5));
-    vec2 rotateUv = rotate(vUv, -uTime * 5.0, vec2(0.5));
-    float strength = 0.15 / distance(vec2(rotateUv.x, (rotateUv.y - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
-    strength += 0.15 / distance(vec2(rotateUv.y, (rotateUv.x - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
-    gl_FragColor = vec4(strength, strength, strength, strength);
+    // vec2 rotateUv = rotate(vUv, -uTime * 5.0, vec2(0.5));
+    // float strength = 0.15 / distance(vec2(rotateUv.x, (rotateUv.y - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    // strength += 0.15 / distance(vec2(rotateUv.y, (rotateUv.x - 0.5) * 5.0 + 0.5), vec2(0.5, 0.5)) - 1.0;
+    // gl_FragColor = vec4(strength, strength, strength, strength);
+
+    // 30. 圆
+    // float strength = step(0.5, distance(vUv, vec2(0.5)) + 0.25);
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 31. 绘制圆
+    // float strength = 1.0 - step(0.5, distance(vUv, vec2(0.5)) + 0.25);
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 32. 圆环
+    // float strength = step(0.5, distance(vUv, vec2(0.5)) + 0.35);
+    // strength *= (1.0 - step(0.5, distance(vUv, vec2(0.5)) + 0.25));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 34. 渐变环
+    // float strength = abs(distance(vUv, vec2(0.5)) - 0.25);
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 35. 打靶
+    // float strength = step(0.1, abs(distance(vUv, vec2(0.5)) - 0.25));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 36. 圆环
+    // float strength = 1.0 - step(0.1, abs(distance(vUv, vec2(0.5)) - 0.25));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 37. 波浪环
+    // vec2 waveUv = vec2(
+    //     vUv.x,
+    //     vUv.y + sin(vUv.x * 30.0) * 0.1
+    // );
+    // float strength = 1.0 - step(0.01, abs(distance(waveUv, vec2(0.5)) - 0.25));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // // 38.
+    // vec2 waveUv = vec2(
+    //     vUv.x + sin(vUv.y * 30.0) * 0.1,
+    //     vUv.y + sin(vUv.x * 30.0) * 0.1
+    // );
+    // float strength = 1.0 - step(0.01, abs(distance(waveUv, vec2(0.5)) - 0.25));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 39.
+    // vec2 waveUv = vec2(
+    //     vUv.x + sin(vUv.y * 100.0) * 0.1,
+    //     vUv.y + sin(vUv.x * 100.0) * 0.1
+    // );
+    // float strength = 1.0 - step(0.01, abs(distance(waveUv, vec2(0.5)) - 0.25));
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 40. 根据角度显示视图
+    // float angle = atan(vUv.x, vUv.y);
+    // float strength = angle;
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 41. 根据角度实现螺旋渐变（一般用于雷达）
+    // float angle = atan(vUv.x - 0.5, vUv.y - 0.5);
+    // float strength = (angle + 3.14) / 6.28;
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 42. 实现雷达扫射
+    // float alpha = 1.0 - step(0.5, distance(vUv, vec2(0.5)));
+    // float angle = atan(vUv.x - 0.5, vUv.y - 0.5);
+    // float strength = (angle + 3.14) / 6.28;
+    // gl_FragColor = vec4(strength, strength, strength, alpha);
+
+    // 43. 通过时间实现动态旋转
+    // vec2 rotateUv = rotate(vUv, -uTime * 5.0, vec2(0.5));
+    // float alpha = 1.0 - step(0.5, distance(rotateUv, vec2(0.5)));
+    // float angle = atan(rotateUv.x - 0.5, rotateUv.y - 0.5);
+    // float strength = (angle + 3.14) / 6.28;
+    // gl_FragColor = vec4(strength, strength, strength, alpha);
+
+    // 44. 万花筒
+    // float angle = atan(vUv.x - 0.5, vUv.y - 0.5) / (PI * 2.0);
+    // float strength = mod(angle * 10.0, 1.0);
+    // gl_FragColor = vec4(strength, strength, strength, 1);
+
+    // 45. 光芒四射
+    float angle = atan(vUv.x - 0.5, vUv.y - 0.5) / (PI * 2.0);
+    float strength = sin(angle * 100.0);
+    gl_FragColor = vec4(strength, strength, strength, 1);
 }

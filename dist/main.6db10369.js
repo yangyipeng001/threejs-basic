@@ -44722,9 +44722,9 @@ var index = {
 var _default = index;
 exports.default = _default;
 },{}],"shaders/flyLight/vertex.glsl":[function(require,module,exports) {
-module.exports = "// attribute vec3 position;\n// uniform mat4 modelMatrix;\n// uniform mat4 viewMatrix;\n// uniform mat4 projectionMatrix;\nuniform vec3 uColor;\nuniform float uFrequency;\nuniform float uScale;\nuniform float uTime;\n\nvarying float vElevation;\n\nvarying vec2 vUv;\n\n// highp -2^16-2^16\n// mediump = -2^10-2^10\n// lowp -2^8-2^8\nprecision highp float;\n#define GLSLIFY 1\nvoid main(){\n    vec4 modelPosition = modelMatrix * vec4( position, 1.0 );\n\n    modelPosition.z += sin((modelPosition.x+uTime) * uFrequency)*uScale ;\n    modelPosition.z += cos((modelPosition.y+uTime) * uFrequency)*uScale ;\n\n    vElevation = modelPosition.z;\n    gl_Position =  projectionMatrix * viewMatrix * modelPosition;\n    vUv = uv;\n\n}\n\n";
+module.exports = "precision lowp float;\n#define GLSLIFY 1\n\nvarying vec4 vPosition;\nvarying vec4 gPosition;\n\nvoid main(){\n    vec4 modelPosition = modelMatrix * vec4( position, 1.0 );\n    vPosition = modelPosition;\n    gPosition = vec4( position, 1.0 );\n\n    gl_Position =  projectionMatrix * viewMatrix * modelPosition;\n}\n\n";
 },{}],"shaders/flyLight/fragment.glsl":[function(require,module,exports) {
-module.exports = "uniform vec3 uColor;\nvarying float vElevation;\nprecision highp float;\n#define GLSLIFY 1\nvarying vec2 vUv;\n\nuniform sampler2D uTexture;\nvoid main(){\n    float alpha = (vElevation+0.1)+0.8;\n    // gl_FragColor = vec4(uColor,alpha);\n    // gl_FragColor = vec4(uColor*alpha,1);\n    // gl_FragColor= vec4(vUv,0,1);\n\n    vec4 textureColor = texture2D(uTexture,vUv);\n    textureColor.rgb*=alpha;\n    gl_FragColor = textureColor;\n}";
+module.exports = "precision lowp float;\n#define GLSLIFY 1\nvarying vec4 vPosition;\nvarying vec4 gPosition;\n\nvoid main(){\n    vec4 redColor = vec4(1, 0, 0, 1);\n    vec4 yellowColor = vec4(1, 1, 0.5, 1);\n    vec4 mixColor = mix(yellowColor, redColor, gPosition.y / 3.0);\n\n    // 判断正面与反面 \n    if (gl_FrontFacing) {\n        gl_FragColor = vec4(mixColor.xyz - (gPosition.y-20.0) / 80.0 - 0.1, 1);\n    } else {\n        gl_FragColor = vec4(mixColor.xyz, 1);\n    }\n}";
 },{}],"../node_modules/three/examples/jsm/loaders/RGBELoader.js":[function(require,module,exports) {
 "use strict";
 
@@ -48261,8 +48261,8 @@ camera.updateProjectionMatrix();
 scene.add(camera);
 
 // 加入辅助轴，帮助我们查看3维坐标轴
-var axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper(5);
+// scene.add(axesHelper);
 
 // 加载纹理
 // 创建环境纹理
@@ -48280,8 +48280,8 @@ var shaderMaterial = new THREE.ShaderMaterial({
   vertexShader: _vertex.default,
   fragmentShader: _fragment.default,
   uniforms: {},
-  side: THREE.DoubleSide,
-  transparent: true
+  side: THREE.DoubleSide
+  //   transparent: true,
 });
 
 // 初始化渲染器
@@ -48294,6 +48294,49 @@ var renderer = new THREE.WebGLRenderer({
 // 渲染器的输出编码
 renderer.outputEncoding = THREE.sRGBEncoding;
 // 色调映射
+// 这个属性用于在普通计算机显示器或者移动设备屏幕等低动态范围介质上，模拟、逼近高动态范围（HDR）效果。
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+// 线性级别
+// renderer.toneMapping = THREE.LinearToneMapping
+// renderer.toneMapping = THREE.ReinhardToneMapping
+// renderer.toneMapping = THREE.CineonToneMapping
+
+// 色调映射的曝光级别。默认是1
+renderer.toneMappingExposure = 0.2;
+
+// 导入孔明灯
+var gLTFLoader = new _GLTFLoader.GLTFLoader();
+var LightBox = null;
+gLTFLoader.load('./assets/model/flyLight.glb', function (gltf) {
+  // console.log('====gltf', gltf)
+  // scene.add(gltf.scene)
+  LightBox = gltf.scene.children[1];
+  LightBox.material = shaderMaterial;
+
+  // 随机生成多个
+  for (var i = 0; i < 100; i++) {
+    var flyLight = gltf.scene.clone(true);
+    // -150 ~ 150
+    var x = (Math.random() - 0.5) * 300;
+    var z = (Math.random() - 0.5) * 300;
+    // 25 ~ 85
+    var y = Math.random() * 60 + 25;
+    flyLight.position.set(x, y, z);
+    _gsap.default.to(flyLight.rotation, {
+      y: 2 * Math.PI,
+      duration: 10 + Math.random() * 30,
+      repeat: -1
+    });
+    _gsap.default.to(flyLight.position, {
+      x: '+=' + Math.random() * 5,
+      y: '+=' + Math.random() * 20,
+      yoyo: true,
+      repeat: -1,
+      duration: 5 + Math.random() * 10
+    });
+    scene.add(flyLight);
+  }
+});
 
 // 设置渲染尺寸大小
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -48320,11 +48363,17 @@ var controls = new _OrbitControls.OrbitControls(camera, renderer.domElement);
 // 设置控制器阻尼
 controls.enableDamping = true;
 // 设置自动旋转
-// controls.autoRotate = true;
-
+controls.autoRotate = true;
+// 当.autoRotate为true时，围绕目标旋转的速度将有多快，默认值为2.0，相当于在60fps时每旋转一周需要30秒。
+controls.autoRotateSpeed = 0.1;
+// 你能够垂直旋转的角度的上限，范围是0到Math.PI，其默认值为Math.PI
+controls.maxPolarAngle = Math.PI / 4 * 3;
+// 你能够垂直旋转的角度的下限，范围是0到Math.PI，其默认值为0。
+controls.minPolarAngle = Math.PI / 4 * 3;
 var clock = new THREE.Clock();
 function animate(t) {
   var elapsedTime = clock.getElapsedTime();
+  controls.update();
 
   //   console.log(elapsedTime);
   requestAnimationFrame(animate);

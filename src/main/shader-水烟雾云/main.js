@@ -37,11 +37,41 @@ scene.add(camera);
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 
+// 参数
+const params = {
+  // 频率
+  uWaresFrequency: 20,
+  // 放大倍数
+  uScale: 0.1,
+}
+
 // 创建着色器材质;
 const shaderMaterial = new THREE.ShaderMaterial({
   vertexShader: vertexShader,
   fragmentShader: fragmentShader,
+  side: THREE.DoubleSide,
+  uniforms: {
+    uWaresFrequency: {
+      value: params.uWaresFrequency,
+    },
+    uScale: {
+      value: params.uScale,
+    },
+  },
+  transparent: true,
 });
+
+
+// 动态修改
+gui
+  .add(params, 'uWaresFrequency')
+  .min(1)
+  .max(100)
+  .step(0.1)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uWaresFrequency.value = value
+  })
+
 
 const plane = new THREE.Mesh(
   new THREE.PlaneBufferGeometry(1, 1, 512, 512),

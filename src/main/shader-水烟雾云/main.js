@@ -40,9 +40,15 @@ scene.add(axesHelper);
 // 参数
 const params = {
   // 频率
-  uWaresFrequency: 20,
-  // 放大倍数
-  uScale: 0.1,
+  uWaresFrequency: 14,
+  // 缩放比例
+  uScale: 0.03,
+  // xz缩放比例
+  uXzScale: 1.5,
+  // 噪声频率
+  uNoiseFrequency: 10,
+  // 噪声缩放比例
+  uNoiseScale: 1.5,
 }
 
 // 创建着色器材质;
@@ -57,6 +63,18 @@ const shaderMaterial = new THREE.ShaderMaterial({
     uScale: {
       value: params.uScale,
     },
+    uXzScale: {
+      value: params.uXzScale,
+    },
+    uNoiseFrequency: {
+      value: params.uNoiseFrequency,
+    },
+    uNoiseScale: {
+      value: params.uNoiseScale,
+    },
+    uTime: {
+      value: params.uTime,
+    }
   },
   transparent: true,
 });
@@ -70,6 +88,38 @@ gui
   .step(0.1)
   .onChange((value) => {
     shaderMaterial.uniforms.uWaresFrequency.value = value
+  })
+gui
+  .add(params, 'uScale')
+  .min(0)
+  .max(0.2)
+  .step(0.001)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uScale.value = value
+  })
+gui
+  .add(params, 'uNoiseFrequency')
+  .min(1)
+  .max(100)
+  .step(0.1)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uNoiseFrequency.value = value
+  })
+gui
+  .add(params, 'uNoiseScale')
+  .min(0)
+  .max(5)
+  .step(0.001)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uNoiseScale.value = value
+  })
+gui
+  .add(params, 'uXzScale')
+  .min(0)
+  .max(5)
+  .step(0.1)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uXzScale.value = value
   })
 
 
@@ -128,6 +178,8 @@ controls.enableDamping = true;
 const clock = new THREE.Clock();
 function animate(t) {
   const elapsedTime = clock.getElapsedTime();
+  shaderMaterial.uniforms.uTime.value = elapsedTime
+
   requestAnimationFrame(animate);
   // 使用渲染器渲染相机看这个场景的内容渲染出来
   renderer.render(scene, camera);

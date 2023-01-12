@@ -1,6 +1,10 @@
 precision lowp float;
 uniform float uWaresFrequency;
 uniform float uScale;
+uniform float uNoiseFrequency;
+uniform float uNoiseScale;
+uniform float uXzScale;
+uniform float uTime;
 
 // 计算出的高度传递给片元着色器
 varying float vElevation;
@@ -83,13 +87,13 @@ float cnoise(vec2 P)
 void main() {
     vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
-    float elevation = sin(modelPosition.x * uWaresFrequency) * sin(modelPosition.z * uWaresFrequency);
+    float elevation = sin(modelPosition.x * uWaresFrequency) * sin(modelPosition.z * uWaresFrequency * uXzScale);
 
-    elevation += cnoise(vec2(modelPosition.xz * 20.0));
-
-    elevation *= uScale;
+    elevation += -abs(cnoise(vec2(modelPosition.xz * uNoiseFrequency + uTime))) * uNoiseScale;
 
     vElevation = elevation;
+    elevation *= uScale;
+
     modelPosition.y += elevation;
 
     gl_Position = projectionMatrix * viewMatrix * modelPosition;

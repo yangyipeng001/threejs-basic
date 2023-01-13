@@ -49,6 +49,18 @@ const params = {
   uNoiseFrequency: 10,
   // 噪声缩放比例
   uNoiseScale: 1.5,
+  // 低处颜色-红色
+  uLowColor: '#ff0000',
+  // 高处颜色-黄色
+  uHighColor: '#ffff00',
+
+  // 速度
+  uXspeed: 1,
+  uZspeed: 1,
+  uNoiseSpeed: 1,
+
+  // 透明度
+  uOpacity: 1,
 }
 
 // 创建着色器材质;
@@ -74,7 +86,25 @@ const shaderMaterial = new THREE.ShaderMaterial({
     },
     uTime: {
       value: params.uTime,
-    }
+    },
+    uLowColor: {
+      value: new THREE.Color(params.uLowColor),
+    },
+    uHighColor: {
+      value: new THREE.Color(params.uHighColor),
+    },
+    uXspeed: {
+      value: params.uXspeed,
+    },
+    uZspeed: {
+      value: params.uTime,
+    },
+    uNoiseSpeed: {
+      value: params.uNoiseSpeed,
+    },
+    uOpacity: {
+      value: params.uOpacity,
+    },
   },
   transparent: true,
 });
@@ -121,10 +151,48 @@ gui
   .onChange((value) => {
     shaderMaterial.uniforms.uXzScale.value = value
   })
+gui.addColor(params, 'uLowColor').onFinishChange((value) => {
+  shaderMaterial.uniforms.uLowColor.value = new THREE.Color(value)
+})
+gui.addColor(params, 'uHighColor').onFinishChange((value) => {
+  shaderMaterial.uniforms.uHighColor.value = new THREE.Color(value)
+})
+gui
+  .add(params, 'uXspeed')
+  .min(0)
+  .max(5)
+  .step(0.001)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uXspeed.value = value
+  })
+gui
+  .add(params, 'uZspeed')
+  .min(0)
+  .max(5)
+  .step(0.001)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uZspeed.value = value
+  })
+gui
+  .add(params, 'uNoiseSpeed')
+  .min(0)
+  .max(5)
+  .step(0.001)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uNoiseSpeed.value = value
+  })
+gui
+  .add(params, 'uOpacity')
+  .min(0)
+  .max(1)
+  .step(0.01)
+  .onChange((value) => {
+    shaderMaterial.uniforms.uOpacity.value = value
+  })
 
 
 const plane = new THREE.Mesh(
-  new THREE.PlaneBufferGeometry(1, 1, 512, 512),
+  new THREE.PlaneBufferGeometry(1, 1, 1024, 1024),
   shaderMaterial
 )
 plane.rotation.x = -Math.PI / 2

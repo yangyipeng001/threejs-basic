@@ -1,14 +1,16 @@
+// ! 目标：使用官方提供的水模型
+
 import * as THREE from "three";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import gsap from "gsap";
 import * as dat from "dat.gui";
-import vertexShader from "../../shaders/water/vertex.glsl";
-import fragmentShader from "../../shaders/water/fragment.glsl";
+
+// 导入water
+import {Water} from 'three/examples/jsm/objects/Water2'
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 
-// 目标：实现孔明灯
 
 // 创建gui对象
 const gui = new dat.GUI();
@@ -26,7 +28,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 // 设置相机位置
 // object3d具有position，属性是1个3维的向量
-camera.position.set(0, 0, 2);
+camera.position.set(5, 5, 5);
 // 更新摄像头
 camera.aspect = window.innerWidth / window.innerHeight;
 // 更新摄像机的投影矩阵
@@ -37,166 +39,63 @@ scene.add(camera);
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 
-// 参数
-const params = {
-  // 频率
-  uWaresFrequency: 14,
-  // 缩放比例
-  uScale: 0.03,
-  // xz缩放比例
-  uXzScale: 1.5,
-  // 噪声频率
-  uNoiseFrequency: 10,
-  // 噪声缩放比例
-  uNoiseScale: 1.5,
-  // 低处颜色-红色
-  uLowColor: '#ff0000',
-  // 高处颜色-黄色
-  uHighColor: '#ffff00',
 
-  // 速度
-  uXspeed: 1,
-  uZspeed: 1,
-  uNoiseSpeed: 1,
-
-  // 透明度
-  uOpacity: 1,
-}
-
-// 创建着色器材质;
-const shaderMaterial = new THREE.ShaderMaterial({
-  vertexShader: vertexShader,
-  fragmentShader: fragmentShader,
-  side: THREE.DoubleSide,
-  uniforms: {
-    uWaresFrequency: {
-      value: params.uWaresFrequency,
-    },
-    uScale: {
-      value: params.uScale,
-    },
-    uXzScale: {
-      value: params.uXzScale,
-    },
-    uNoiseFrequency: {
-      value: params.uNoiseFrequency,
-    },
-    uNoiseScale: {
-      value: params.uNoiseScale,
-    },
-    uTime: {
-      value: params.uTime,
-    },
-    uLowColor: {
-      value: new THREE.Color(params.uLowColor),
-    },
-    uHighColor: {
-      value: new THREE.Color(params.uHighColor),
-    },
-    uXspeed: {
-      value: params.uXspeed,
-    },
-    uZspeed: {
-      value: params.uTime,
-    },
-    uNoiseSpeed: {
-      value: params.uNoiseSpeed,
-    },
-    uOpacity: {
-      value: params.uOpacity,
-    },
-  },
-  transparent: true,
-});
+// const water = new Water(
+//   new THREE.PlaneBufferGeometry(1, 1, 1024, 1024),
+//   {
+//     color: '#ffffff',
+//     // 水纹大小
+//     scale: 1,
+//     // 水纹方向
+//     flowDirection: new THREE.Vector2(1, 1),
+//     // 纹理宽高
+//     textureWidth: 1024,
+//     textureHeight: 1024,
+//   }
+// )
+// water.rotation.x = -Math.PI / 2
+// scene.add(water)
 
 
-// 动态修改
-gui
-  .add(params, 'uWaresFrequency')
-  .min(1)
-  .max(100)
-  .step(0.1)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uWaresFrequency.value = value
-  })
-gui
-  .add(params, 'uScale')
-  .min(0)
-  .max(0.2)
-  .step(0.001)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uScale.value = value
-  })
-gui
-  .add(params, 'uNoiseFrequency')
-  .min(1)
-  .max(100)
-  .step(0.1)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uNoiseFrequency.value = value
-  })
-gui
-  .add(params, 'uNoiseScale')
-  .min(0)
-  .max(5)
-  .step(0.001)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uNoiseScale.value = value
-  })
-gui
-  .add(params, 'uXzScale')
-  .min(0)
-  .max(5)
-  .step(0.1)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uXzScale.value = value
-  })
-gui.addColor(params, 'uLowColor').onFinishChange((value) => {
-  shaderMaterial.uniforms.uLowColor.value = new THREE.Color(value)
+// 加载场景背景
+const rgbeLoader = new RGBELoader()
+rgbeLoader.loadAsync('./assets/050.hdr').then((texture) => {
+  // 设置为经纬球纹理
+  texture.mapping = THREE.EquirectangularRefractionMapping
+  // 场景背景
+  scene.background = texture
+  // 场景环境
+  scene.environment = texture
 })
-gui.addColor(params, 'uHighColor').onFinishChange((value) => {
-  shaderMaterial.uniforms.uHighColor.value = new THREE.Color(value)
+
+// 加载浴缸
+const gltfLoader = new GLTFLoader()
+gltfLoader.load('./assets/model/yugang.glb', (gltf) => {
+  console.log('----',gltf.scene.children)
+  const yugang = gltf.scene.children[0]
+  yugang.material.side = THREE.DoubleSide
+
+  const waterGeometry = gltf.scene.children[1].geometry
+  const water = new Water(
+    waterGeometry,
+    {
+      color: '#ffffff',
+      // 水纹大小
+      scale: 1,
+      // 水纹方向
+      flowDirection: new THREE.Vector2(1, 1),
+      // 纹理宽高
+      textureWidth: 1024,
+      textureHeight: 1024,
+    }
+  )
+  scene.add(water)
+  scene.add(yugang)
 })
-gui
-  .add(params, 'uXspeed')
-  .min(0)
-  .max(5)
-  .step(0.001)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uXspeed.value = value
-  })
-gui
-  .add(params, 'uZspeed')
-  .min(0)
-  .max(5)
-  .step(0.001)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uZspeed.value = value
-  })
-gui
-  .add(params, 'uNoiseSpeed')
-  .min(0)
-  .max(5)
-  .step(0.001)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uNoiseSpeed.value = value
-  })
-gui
-  .add(params, 'uOpacity')
-  .min(0)
-  .max(1)
-  .step(0.01)
-  .onChange((value) => {
-    shaderMaterial.uniforms.uOpacity.value = value
-  })
 
-
-const plane = new THREE.Mesh(
-  new THREE.PlaneBufferGeometry(1, 1, 1024, 1024),
-  shaderMaterial
-)
-plane.rotation.x = -Math.PI / 2
-scene.add(plane)
+// 灯光 - 直线光
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+scene.add(directionalLight)
 
 
 // 初始化渲染器
@@ -246,7 +145,6 @@ controls.enableDamping = true;
 const clock = new THREE.Clock();
 function animate(t) {
   const elapsedTime = clock.getElapsedTime();
-  shaderMaterial.uniforms.uTime.value = elapsedTime
 
   requestAnimationFrame(animate);
   // 使用渲染器渲染相机看这个场景的内容渲染出来

@@ -45081,9 +45081,9 @@ var RGBELoader = /*#__PURE__*/function (_DataTextureLoader) {
 }(_three.DataTextureLoader);
 exports.RGBELoader = RGBELoader;
 },{"three":"../node_modules/three/build/three.module.js"}],"shader/basic-points/fragmentShader.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nvarying float vImgIndex;\n\nuniform sampler2D uTexture;\nuniform sampler2D uTexture1;\nuniform sampler2D uTexture2;\n\nvoid main() {\n    // gl_FragColor = vec4(gl_PointCoord, 0.0, 1.0);\n\n    // 设置渐变圆\n    // float strength = distance(gl_PointCoord, vec2(0.5));\n    // strength *= 2.0;\n    // strength = 1.0 - strength;\n    // gl_FragColor = vec4(strength);\n\n    // 圆形点\n    // float strength = 1.0 - distance(gl_PointCoord, vec2(0.5));\n    // strength = step(0.5, strength);\n    // gl_FragColor = vec4(strength);\n\n    // 根据纹理设置图案\n    // vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    // // gl_FragColor = textureColor;\n    // gl_FragColor = vec4(textureColor.rgb, textureColor.r);\n\n    // vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    // gl_FragColor = vec4(gl_PointCoord, 1.0, textureColor.r);\n\n    vec4 textureColor;\n    if (vImgIndex == 0.0) {\n        textureColor = texture2D(uTexture, gl_PointCoord);\n    }\n    else if (vImgIndex == 1.0) {\n        textureColor = texture2D(uTexture1, gl_PointCoord);\n    }\n    else {\n        textureColor = texture2D(uTexture2, gl_PointCoord);\n    }\n    \n    gl_FragColor = vec4(gl_PointCoord, 1.0, textureColor.r);\n}";
+module.exports = "#define GLSLIFY 1\nvarying float vImgIndex;\n\nuniform sampler2D uTexture;\nuniform sampler2D uTexture1;\nuniform sampler2D uTexture2;\nvarying vec3 vColor;\n\nvoid main() {\n    // gl_FragColor = vec4(gl_PointCoord, 0.0, 1.0);\n\n    // 设置渐变圆\n    // float strength = distance(gl_PointCoord, vec2(0.5));\n    // strength *= 2.0;\n    // strength = 1.0 - strength;\n    // gl_FragColor = vec4(strength);\n\n    // 圆形点\n    // float strength = 1.0 - distance(gl_PointCoord, vec2(0.5));\n    // strength = step(0.5, strength);\n    // gl_FragColor = vec4(strength);\n\n    // 根据纹理设置图案\n    // vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    // // gl_FragColor = textureColor;\n    // gl_FragColor = vec4(textureColor.rgb, textureColor.r);\n\n    // vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    // gl_FragColor = vec4(gl_PointCoord, 1.0, textureColor.r);\n\n    vec4 textureColor;\n    if (vImgIndex == 0.0) {\n        textureColor = texture2D(uTexture, gl_PointCoord);\n    }\n    else if (vImgIndex == 1.0) {\n        textureColor = texture2D(uTexture1, gl_PointCoord);\n    }\n    else {\n        textureColor = texture2D(uTexture2, gl_PointCoord);\n    }\n    \n    // gl_FragColor = vec4(gl_PointCoord, 1.0, textureColor.r);\n\n    gl_FragColor = vec4(vColor, textureColor.r);\n}";
 },{}],"shader/basic-points/vertexShader.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nattribute float imgIndex;\nattribute float aScale;\nvarying float vImgIndex;\nuniform float uTime;\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n\n    // 获取顶点的角度\n    float angle = atan(modelPosition.x, modelPosition.z);\n    // 获取顶点到中心的距离\n    float distanceToCenter = length(modelPosition.xz);\n    // 根据顶点到中心的距离，设置旋转偏移度数\n    float angleOffset = 1.0 / distanceToCenter * uTime;\n    // 目前旋转的度数\n    angle += angleOffset;\n\n    modelPosition.x = cos(angle) * distanceToCenter;\n    modelPosition.z = sin(angle) * distanceToCenter;\n\n    vec4 viewPosition = viewMatrix * modelPosition;\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置点的大小\n    // gl_PointSize = 100.0;\n\n    // 根据viewPosition的z坐标决定是否原理摄像机\n    gl_PointSize = 200.0 / -viewPosition.z * aScale;\n\n    vImgIndex = imgIndex;\n}";
+module.exports = "#define GLSLIFY 1\nattribute float imgIndex;\nattribute float aScale;\nvarying float vImgIndex;\nuniform float uTime;\nvarying vec3 vColor;\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n\n    // 获取顶点的角度\n    float angle = atan(modelPosition.x, modelPosition.z);\n    // 获取顶点到中心的距离\n    float distanceToCenter = length(modelPosition.xz);\n    // 根据顶点到中心的距离，设置旋转偏移度数\n    float angleOffset = 1.0 / distanceToCenter * uTime;\n    // 目前旋转的度数\n    angle += angleOffset;\n\n    modelPosition.x = cos(angle) * distanceToCenter;\n    modelPosition.z = sin(angle) * distanceToCenter;\n\n    vec4 viewPosition = viewMatrix * modelPosition;\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置点的大小\n    // gl_PointSize = 100.0;\n\n    // 根据viewPosition的z坐标决定是否原理摄像机\n    gl_PointSize = 200.0 / -viewPosition.z * aScale;\n\n    vImgIndex = imgIndex;\n    vColor = color;\n}";
 },{}],"main/shader-粒子效果/main.js":[function(require,module,exports) {
 "use strict";
 
@@ -45187,6 +45187,7 @@ var params = {
 var galaxyColor = new THREE.Color(params.color);
 var outGalaxyColor = new THREE.Color(params.outColor);
 var generateGalaxy = function generateGalaxy() {
+  var _uniforms;
   // 如果已经存在这些顶点，那么先释放内存，再删除顶点数据
   if (points !== null) {
     geometry.dispose();
@@ -45250,7 +45251,7 @@ var generateGalaxy = function generateGalaxy() {
     vertexColors: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
-    uniforms: _defineProperty({
+    uniforms: (_uniforms = {
       uTime: {
         value: 0
       },
@@ -45263,9 +45264,11 @@ var generateGalaxy = function generateGalaxy() {
       uTexture2: {
         value: texture2
       }
-    }, "uTime", {
+    }, _defineProperty(_uniforms, "uTime", {
       value: 0
-    })
+    }), _defineProperty(_uniforms, "uColor", {
+      value: galaxyColor
+    }), _uniforms)
   });
 
   // 生成点

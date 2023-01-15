@@ -185,6 +185,9 @@ const generateGalaxy = () => {
             uTime: {
                 value: 0,
             },
+            uColor: {
+                value: galaxyColor
+            },
         }
     })
 

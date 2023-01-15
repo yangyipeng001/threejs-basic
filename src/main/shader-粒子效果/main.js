@@ -182,6 +182,9 @@ const generateGalaxy = () => {
             uTexture2: {
                 value: texture2
             },
+            uTime: {
+                value: 0,
+            },
         }
     })
 
@@ -222,6 +225,7 @@ const clock = new THREE.Clock()
 // 渲染函数
 function render() {
     const time = clock.getElapsedTime()
+    material.uniforms.uTime.value = time
 
     controls.update()
     renderer.render(scene, camera)

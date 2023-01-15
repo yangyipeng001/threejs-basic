@@ -45083,7 +45083,7 @@ exports.RGBELoader = RGBELoader;
 },{"three":"../node_modules/three/build/three.module.js"}],"shader/basic-points/fragmentShader.glsl":[function(require,module,exports) {
 module.exports = "#define GLSLIFY 1\nvarying float vImgIndex;\n\nuniform sampler2D uTexture;\nuniform sampler2D uTexture1;\nuniform sampler2D uTexture2;\n\nvoid main() {\n    // gl_FragColor = vec4(gl_PointCoord, 0.0, 1.0);\n\n    // 设置渐变圆\n    // float strength = distance(gl_PointCoord, vec2(0.5));\n    // strength *= 2.0;\n    // strength = 1.0 - strength;\n    // gl_FragColor = vec4(strength);\n\n    // 圆形点\n    // float strength = 1.0 - distance(gl_PointCoord, vec2(0.5));\n    // strength = step(0.5, strength);\n    // gl_FragColor = vec4(strength);\n\n    // 根据纹理设置图案\n    // vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    // // gl_FragColor = textureColor;\n    // gl_FragColor = vec4(textureColor.rgb, textureColor.r);\n\n    // vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    // gl_FragColor = vec4(gl_PointCoord, 1.0, textureColor.r);\n\n    vec4 textureColor;\n    if (vImgIndex == 0.0) {\n        textureColor = texture2D(uTexture, gl_PointCoord);\n    }\n    else if (vImgIndex == 1.0) {\n        textureColor = texture2D(uTexture1, gl_PointCoord);\n    }\n    else {\n        textureColor = texture2D(uTexture2, gl_PointCoord);\n    }\n    \n    gl_FragColor = vec4(gl_PointCoord, 1.0, textureColor.r);\n}";
 },{}],"shader/basic-points/vertexShader.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nattribute float imgIndex;\nattribute float aScale;\nvarying float vImgIndex;\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n    vec4 viewPosition = viewMatrix * modelPosition;\n\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置点的大小\n    // gl_PointSize = 100.0;\n\n    // 根据viewPosition的z坐标决定是否原理摄像机\n    gl_PointSize = 200.0 / -viewPosition.z * aScale;\n\n    vImgIndex = imgIndex;\n}";
+module.exports = "#define GLSLIFY 1\nattribute float imgIndex;\nattribute float aScale;\nvarying float vImgIndex;\nuniform float uTime;\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n\n    // 获取顶点的角度\n    float angle = atan(modelPosition.x, modelPosition.z);\n    // 获取顶点到中心的距离\n    float distanceToCenter = length(modelPosition.xz);\n    // 根据顶点到中心的距离，设置旋转偏移度数\n    float angleOffset = 1.0 / distanceToCenter * uTime;\n    // 目前旋转的度数\n    angle += angleOffset;\n\n    modelPosition.x = cos(angle) * distanceToCenter;\n    modelPosition.z = sin(angle) * distanceToCenter;\n\n    vec4 viewPosition = viewMatrix * modelPosition;\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置点的大小\n    // gl_PointSize = 100.0;\n\n    // 根据viewPosition的z坐标决定是否原理摄像机\n    gl_PointSize = 200.0 / -viewPosition.z * aScale;\n\n    vImgIndex = imgIndex;\n}";
 },{}],"main/shader-粒子效果/main.js":[function(require,module,exports) {
 "use strict";
 
@@ -45097,16 +45097,10 @@ var _vertexShader = _interopRequireDefault(require("../../shader/basic-points/ve
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-// ! 目标：shader 粒子效果
-
-// 导入轨道控制器
-
-// 导入动画库
-
-// 导入dat.gui
-
-// 加载RGBELoader 加载器
-
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 // 灯光与阴影
 // 1、材质要满足能够对光照有反应
 // 2、设置渲染器开启阴影的计算 renderer.shadowMap.enabled = true
@@ -45256,7 +45250,7 @@ var generateGalaxy = function generateGalaxy() {
     vertexColors: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
-    uniforms: {
+    uniforms: _defineProperty({
       uTime: {
         value: 0
       },
@@ -45269,7 +45263,9 @@ var generateGalaxy = function generateGalaxy() {
       uTexture2: {
         value: texture2
       }
-    }
+    }, "uTime", {
+      value: 0
+    })
   });
 
   // 生成点
@@ -45307,6 +45303,7 @@ var clock = new THREE.Clock();
 // 渲染函数
 function render() {
   var time = clock.getElapsedTime();
+  material.uniforms.uTime.value = time;
   controls.update();
   renderer.render(scene, camera);
   // 渲染下一帧的时候就会调用render函数

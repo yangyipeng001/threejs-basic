@@ -1,4 +1,5 @@
 attribute float imgIndex;
+attribute float aScale;
 varying float vImgIndex;
 
 void main() {
@@ -8,7 +9,10 @@ void main() {
     gl_Position = projectionMatrix * viewPosition;
 
     // 设置点的大小
-    gl_PointSize = 100.0;
+    // gl_PointSize = 100.0;
+
+    // 根据viewPosition的z坐标决定是否原理摄像机
+    gl_PointSize = 200.0 / -viewPosition.z * aScale;
 
     vImgIndex = imgIndex;
 }

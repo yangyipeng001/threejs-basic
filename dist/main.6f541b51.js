@@ -45081,9 +45081,9 @@ var RGBELoader = /*#__PURE__*/function (_DataTextureLoader) {
 }(_three.DataTextureLoader);
 exports.RGBELoader = RGBELoader;
 },{"three":"../node_modules/three/build/three.module.js"}],"shader/basic-points/fragmentShader.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nvoid main() {\n    // gl_FragColor = vec4(gl_PointCoord, 0.0, 1.0);\n\n    // 设置渐变圆\n    float strength = distance(gl_PointCoord, vec2(0.5));\n    strength *= 2.0;\n    strength = 1.0 - strength;\n    gl_FragColor = vec4(strength);\n\n    // 圆形点\n    // float strength = 1.0 - distance(gl_PointCoord, vec2(0.5));\n    // strength = step(0.5, strength);\n    // gl_FragColor = vec4(strength);\n}";
+module.exports = "#define GLSLIFY 1\nuniform sampler2D uTexture;\n\nvoid main() {\n    // gl_FragColor = vec4(gl_PointCoord, 0.0, 1.0);\n\n    // 设置渐变圆\n    // float strength = distance(gl_PointCoord, vec2(0.5));\n    // strength *= 2.0;\n    // strength = 1.0 - strength;\n    // gl_FragColor = vec4(strength);\n\n    // 圆形点\n    // float strength = 1.0 - distance(gl_PointCoord, vec2(0.5));\n    // strength = step(0.5, strength);\n    // gl_FragColor = vec4(strength);\n\n    // 根据纹理设置图案\n    // vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    // // gl_FragColor = textureColor;\n    // gl_FragColor = vec4(textureColor.rgb, textureColor.r);\n\n    vec4 textureColor = texture2D(uTexture, gl_PointCoord);\n    gl_FragColor = vec4(gl_PointCoord, 1.0, textureColor.r);\n}";
 },{}],"shader/basic-points/vertexShader.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n    vec4 viewPosition = viewMatrix * modelPosition;\n\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置点的大小\n    gl_PointSize = 80.0;\n}";
+module.exports = "#define GLSLIFY 1\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n    vec4 viewPosition = viewMatrix * modelPosition;\n\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置点的大小\n    gl_PointSize = 100.0;\n}";
 },{}],"main/shader-粒子效果/main.js":[function(require,module,exports) {
 "use strict";
 
@@ -45150,12 +45150,21 @@ geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 //     sizeAttenuation: true,
 // })
 
+// 导入纹理
+var textureLoader = new THREE.TextureLoader();
+var texture = textureLoader.load('textures/particles/10.png');
+
 // 点着色起材质
 var material = new THREE.ShaderMaterial({
   vertexShader: _vertexShader.default,
   fragmentShader: _fragmentShader.default,
   // 透明度
-  transparent: true
+  transparent: true,
+  uniforms: {
+    uTexture: {
+      value: texture
+    }
+  }
 });
 
 // 生成点

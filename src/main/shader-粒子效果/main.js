@@ -60,12 +60,22 @@ geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 //     sizeAttenuation: true,
 // })
 
+// 导入纹理
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load('textures/particles/10.png')
+
 // 点着色起材质
 const material = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
     // 透明度
     transparent: true,
+
+    uniforms: {
+        uTexture: {
+            value: texture
+        }
+    },
 })
 
 // 生成点

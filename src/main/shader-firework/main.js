@@ -1,4 +1,4 @@
-// ! 目标：实现孔明灯
+// ! 目标：shander 绚丽烟花
 
 import * as THREE from "three";
 
@@ -9,6 +9,7 @@ import vertexShader from "../../shaders/flyLight/vertex.glsl";
 import fragmentShader from "../../shaders/flyLight/fragment.glsl";
 import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
+import Fireworks from './firework'
 
 // 创建gui对象
 const gui = new dat.GUI();
@@ -29,7 +30,7 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(0, 0, 2);
 // 更新摄像头
 camera.aspect = window.innerWidth / window.innerHeight;
-//   更新摄像机的投影矩阵
+// 更新摄像机的投影矩阵
 camera.updateProjectionMatrix();
 scene.add(camera);
 
@@ -77,7 +78,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping
 // renderer.toneMapping = THREE.CineonToneMapping
 
 // 色调映射的曝光级别。默认是1
-renderer.toneMappingExposure = 0.2
+renderer.toneMappingExposure = 0.1
 
 
 // 导入孔明灯
@@ -90,7 +91,7 @@ gLTFLoader.load('./assets/model/flyLight.glb', (gltf) => {
     LightBox.material = shaderMaterial
 
     // 随机生成多个
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 50; i++) {
         let flyLight = gltf.scene.clone(true)
         // -150 ~ 150
         let x = (Math.random() - 0.5) * 300
@@ -124,12 +125,12 @@ window.addEventListener("resize", () => {
   //   console.log("resize");
   // 更新摄像头
   camera.aspect = window.innerWidth / window.innerHeight;
-  //   更新摄像机的投影矩阵
+  // 更新摄像机的投影矩阵
   camera.updateProjectionMatrix();
 
-  //   更新渲染器
+  // 更新渲染器
   renderer.setSize(window.innerWidth, window.innerHeight);
-  //   设置渲染器的像素比例
+  // 设置渲染器的像素比例
   renderer.setPixelRatio(window.devicePixelRatio);
 });
 
@@ -145,9 +146,9 @@ controls.autoRotate = true;
 // 当.autoRotate为true时，围绕目标旋转的速度将有多快，默认值为2.0，相当于在60fps时每旋转一周需要30秒。
 controls.autoRotateSpeed = 0.1;
 // 你能够垂直旋转的角度的上限，范围是0到Math.PI，其默认值为Math.PI
-controls.maxPolarAngle = Math.PI / 4 * 3
+controls.maxPolarAngle = Math.PI / 3 * 2
 // 你能够垂直旋转的角度的下限，范围是0到Math.PI，其默认值为0。
-controls.minPolarAngle = Math.PI / 4 * 3
+controls.minPolarAngle = Math.PI / 3 * 2
 
 const clock = new THREE.Clock();
 function animate(t) {
@@ -162,3 +163,26 @@ function animate(t) {
 }
 
 animate();
+
+
+// 管理烟花
+const fireworks = []
+// 设置创建烟花函数
+const createFireworks = () => {
+  // 颜色
+  const color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 80%)`
+  const position = {
+    x: (Math.random() - 0.5) * 40,
+    z: (Math.random() - 0.5) * 40,
+    y: 7 + Math.random() * 25,
+  }
+
+  // 随机生成颜色和烟花放的位置
+  const firework = new Fireworks(color, position)
+
+  // 添加到场景当中
+  firework.addScene(scene, camera)
+  fireworks.push(firework)
+}
+// 监听点击事件
+window.addEventListener('click', createFireworks)

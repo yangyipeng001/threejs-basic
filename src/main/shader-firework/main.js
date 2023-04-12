@@ -27,7 +27,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 // 设置相机位置
 // object3d具有position，属性是1个3维的向量
-camera.position.set(0, 0, 2);
+camera.position.set(0, 0, 20);
 // 更新摄像头
 camera.aspect = window.innerWidth / window.innerHeight;
 // 更新摄像机的投影矩阵
@@ -35,8 +35,8 @@ camera.updateProjectionMatrix();
 scene.add(camera);
 
 // 加入辅助轴，帮助我们查看3维坐标轴
-// const axesHelper = new THREE.AxesHelper(5);
-// scene.add(axesHelper);
+const axesHelper = new THREE.AxesHelper(5);
+scene.add(axesHelper);
 
 
 // 加载纹理
@@ -97,7 +97,7 @@ gLTFLoader.load('./assets/model/flyLight.glb', (gltf) => {
         let x = (Math.random() - 0.5) * 300
         let z = (Math.random() - 0.5) * 300
         // 25 ~ 85
-        let y = Math.random() * 60 + 25
+        let y = Math.random() * 60 + 5
 
         flyLight.position.set(x, y, z)
         gsap.to(flyLight.rotation, {
@@ -146,35 +146,39 @@ controls.autoRotate = true;
 // 当.autoRotate为true时，围绕目标旋转的速度将有多快，默认值为2.0，相当于在60fps时每旋转一周需要30秒。
 controls.autoRotateSpeed = 0.1;
 // 你能够垂直旋转的角度的上限，范围是0到Math.PI，其默认值为Math.PI
-controls.maxPolarAngle = Math.PI / 3 * 2
+// controls.maxPolarAngle = Math.PI / 3 * 2
 // 你能够垂直旋转的角度的下限，范围是0到Math.PI，其默认值为0。
-controls.minPolarAngle = Math.PI / 3 * 2
+// controls.minPolarAngle = Math.PI / 3 * 2
+
+// 管理烟花
+const fireworks = []
 
 const clock = new THREE.Clock();
 function animate(t) {
   const elapsedTime = clock.getElapsedTime();
-
   controls.update()
+
+  // 更新
+  fireworks.forEach((item) => {
+    item.update()
+  })
 
   //   console.log(elapsedTime);
   requestAnimationFrame(animate);
   // 使用渲染器渲染相机看这个场景的内容渲染出来
   renderer.render(scene, camera);
 }
-
 animate();
 
 
-// 管理烟花
-const fireworks = []
 // 设置创建烟花函数
 const createFireworks = () => {
   // 颜色
   const color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 80%)`
   const position = {
     x: (Math.random() - 0.5) * 40,
-    z: (Math.random() - 0.5) * 40,
-    y: 7 + Math.random() * 25,
+    z: -(Math.random() - 0.5) * 40,
+    y: 3 + Math.random() * 15,
   }
 
   // 随机生成颜色和烟花放的位置

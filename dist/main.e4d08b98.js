@@ -48226,7 +48226,15 @@ function toTrianglesDrawMode(geometry, drawMode) {
   newGeometry.setIndex(newIndices);
   return newGeometry;
 }
-},{"three":"../node_modules/three/build/three.module.js"}],"main/shader-firework/firework.js":[function(require,module,exports) {
+},{"three":"../node_modules/three/build/three.module.js"}],"shaders/startpoint/fragment.glsl":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nvoid main() {\n    float distanceToCenter = distance(gl_PointCoord, vec2(0.5));\n    float strength = distanceToCenter * 2.0;\n    strength = 1.0 - strength;\n    strength = pow(strength, 1.5);\n\n    gl_FragColor = vec4(1, 0, 0, strength);\n}";
+},{}],"shaders/startpoint/vertex.glsl":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nattribute vec3 aStep;\nuniform float uTime;\nuniform float uSize;\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n    modelPosition.xyz += (aStep * uTime);\n\n    vec4 viewPosition = viewMatrix * modelPosition;\n\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置顶点大小\n    gl_PointSize = uSize;\n}";
+},{}],"shaders/fireworks/fragment.glsl":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nvoid main() {\n    float distanceToCenter = distance(gl_PointCoord, vec2(0.5));\n    float strength = distanceToCenter * 2.0;\n    strength = 1.0 - strength;\n    strength = pow(strength, 1.5);\n\n    gl_FragColor = vec4(1, 0, 0, strength);\n}";
+},{}],"shaders/fireworks/vertex.glsl":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nattribute float aScale;\nattribute vec3 aRandom;\nuniform float uTime;\nuniform float uSize;\n\nvoid main() {\n    vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n    // modelPosition.xyz += aRandom * uTime * 0.5;\n    modelPosition.xyz += aRandom * uTime * 10.0;\n\n    vec4 viewPosition = viewMatrix * modelPosition;\n\n    gl_Position = projectionMatrix * viewPosition;\n\n    // 设置顶点大小\n    gl_PointSize = uSize * aScale - (uTime * 20.0);\n}";
+},{}],"main/shader-firework/firework.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -48234,6 +48242,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var THREE = _interopRequireWildcard(require("three"));
+var _fragment = _interopRequireDefault(require("../../shaders/startpoint/fragment.glsl"));
+var _vertex = _interopRequireDefault(require("../../shaders/startpoint/vertex.glsl"));
+var _fragment2 = _interopRequireDefault(require("../../shaders/fireworks/fragment.glsl"));
+var _vertex2 = _interopRequireDefault(require("../../shaders/fireworks/vertex.glsl"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
@@ -48243,20 +48256,151 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 var Fireworks = /*#__PURE__*/function () {
-  function Fireworks(color, position) {
+  function Fireworks(color, to) {
+    var from = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
+      x: 0,
+      y: 0,
+      z: 0
+    };
     _classCallCheck(this, Fireworks);
-    console.log('创建烟花：', color, position);
+    // console.log('创建烟花：', color, to)
+
+    // 创建烟花发射的球点
+    this.startGeometry = new THREE.BufferGeometry();
+    var startPossitionArray = new Float32Array(3);
+    startPossitionArray[0] = from.x;
+    startPossitionArray[1] = from.y;
+    startPossitionArray[2] = from.z;
+    this.startGeometry.setAttribute('position', new THREE.BufferAttribute(startPossitionArray, 3));
+
+    // 自定义一个属性
+    var astepArray = new Float32Array(3);
+    astepArray[0] = to.x - from.x;
+    astepArray[1] = to.y - from.y;
+    astepArray[2] = to.z - from.z;
+    this.startGeometry.setAttribute('aStep', new THREE.BufferAttribute(astepArray, 3));
+
+    // 设置着色器材质
+    this.startMaterial = new THREE.ShaderMaterial({
+      vertexShader: _vertex.default,
+      fragmentShader: _fragment.default,
+      // 是否允许透明
+      transparent: true,
+      // 在使用此材质显示对象时要使用何种混合
+      blending: THREE.AdditiveBlending,
+      // 渲染此材质是否对深度缓冲区有任何影响。默认为true
+      depthWrite: false,
+      uniforms: {
+        uTime: {
+          value: 0
+        },
+        uSize: {
+          value: 20
+        }
+      }
+    });
+
+    // 创建烟花点球
+    this.startPoint = new THREE.Points(this.startGeometry, this.startMaterial);
+
+    // 开始计时
+    this.clock = new THREE.Clock();
+
+    // 创建爆炸的烟花
+    this.fireworkGeometry = new THREE.BufferGeometry();
+    this.FireworksCount = 180 + Math.floor(Math.random() * 180);
+    var positionFireworksArray = new Float32Array(this.FireworksCount * 3);
+    var scaleFireArray = new Float32Array(this.FireworksCount);
+    // 方向
+    var directionArray = new Float32Array(this.FireworksCount * 3);
+    for (var i = 0; i < this.FireworksCount; i++) {
+      // 一开始烟花的位置
+      positionFireworksArray[i * 3 + 0] = to.x;
+      positionFireworksArray[i * 3 + 1] = to.y;
+      positionFireworksArray[i * 3 + 2] = to.z;
+
+      // 设置烟花所有粒子初始化大小
+      scaleFireArray[i] = Math.random();
+      // 设置四周发射的角度（相当于经纬度）
+      var theta = Math.random() * 2 * Math.PI;
+      var beta = Math.random() * 2 * Math.PI;
+      var r = Math.random();
+      directionArray[i * 3 + 0] = r * Math.sin(theta) + r * Math.sin(beta);
+      directionArray[i * 3 + 1] = r * Math.cos(theta) + r * Math.cos(beta);
+      directionArray[i * 3 + 2] = r * Math.sin(theta) + r * Math.cos(beta);
+    }
+    this.fireworkGeometry.setAttribute('position', new THREE.BufferAttribute(positionFireworksArray, 3));
+    this.fireworkGeometry.setAttribute('aScale', new THREE.BufferAttribute(scaleFireArray, 1));
+    this.fireworkGeometry.setAttribute('aRandom', new THREE.BufferAttribute(directionArray, 3));
+    this.fireworksMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: {
+          value: 0
+        },
+        uSize: {
+          value: 0
+        }
+      },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      vertexShader: _vertex2.default,
+      fragmentShader: _fragment2.default
+    });
+    this.fireworks = new THREE.Points(this.fireworkGeometry, this.fireworksMaterial);
   }
 
   // 添加到场景中
   _createClass(Fireworks, [{
     key: "addScene",
-    value: function addScene() {}
+    value: function addScene(scene, camera) {
+      scene.add(this.startPoint);
+      scene.add(this.fireworks);
+      this.scene = scene;
+    }
+
+    // update变量
+  }, {
+    key: "update",
+    value: function update() {
+      var elapsedTime = this.clock.getElapsedTime();
+      // console.log(elapsedTime)
+
+      if (elapsedTime < 1) {
+        this.startMaterial.uniforms.uTime.value = elapsedTime;
+        this.startMaterial.uniforms.uSize.value = 20.0;
+      } else {
+        var time = elapsedTime - 1;
+
+        // 让元素消失
+        this.startMaterial.uniforms.uSize.value = 0;
+        // 从内存中清除
+        this.startPoint.clear();
+        // 清除几何体
+        this.startGeometry.dispose();
+        // 清除材质
+        this.startMaterial.dispose();
+
+        // 设置烟花显示
+        this.fireworksMaterial.uniforms.uSize.value = 20;
+        this.fireworksMaterial.uniforms.uTime.value = time;
+
+        // 消失处理
+        if (time > 5) {
+          // 从内存中清除
+          this.fireworks.clear();
+          // 清除几何体
+          this.fireworkGeometry.dispose();
+          // 清除材质
+          this.fireworksMaterial.dispose();
+        }
+      }
+    }
   }]);
   return Fireworks;
 }();
 exports.default = Fireworks;
-},{"three":"../node_modules/three/build/three.module.js"}],"main/shader-firework/main.js":[function(require,module,exports) {
+},{"three":"../node_modules/three/build/three.module.js","../../shaders/startpoint/fragment.glsl":"shaders/startpoint/fragment.glsl","../../shaders/startpoint/vertex.glsl":"shaders/startpoint/vertex.glsl","../../shaders/fireworks/fragment.glsl":"shaders/fireworks/fragment.glsl","../../shaders/fireworks/vertex.glsl":"shaders/fireworks/vertex.glsl"}],"main/shader-firework/main.js":[function(require,module,exports) {
 "use strict";
 
 var THREE = _interopRequireWildcard(require("three"));
@@ -48284,7 +48428,7 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(90, window.innerHeight / window.innerHeight, 0.1, 1000);
 // 设置相机位置
 // object3d具有position，属性是1个3维的向量
-camera.position.set(0, 0, 2);
+camera.position.set(0, 0, 20);
 // 更新摄像头
 camera.aspect = window.innerWidth / window.innerHeight;
 // 更新摄像机的投影矩阵
@@ -48292,8 +48436,8 @@ camera.updateProjectionMatrix();
 scene.add(camera);
 
 // 加入辅助轴，帮助我们查看3维坐标轴
-// const axesHelper = new THREE.AxesHelper(5);
-// scene.add(axesHelper);
+var axesHelper = new THREE.AxesHelper(5);
+scene.add(axesHelper);
 
 // 加载纹理
 // 创建环境纹理
@@ -48351,7 +48495,7 @@ gLTFLoader.load('./assets/model/flyLight.glb', function (gltf) {
     var x = (Math.random() - 0.5) * 300;
     var z = (Math.random() - 0.5) * 300;
     // 25 ~ 85
-    var y = Math.random() * 60 + 25;
+    var y = Math.random() * 60 + 5;
     flyLight.position.set(x, y, z);
     _gsap.default.to(flyLight.rotation, {
       y: 2 * Math.PI,
@@ -48398,13 +48542,21 @@ controls.autoRotate = true;
 // 当.autoRotate为true时，围绕目标旋转的速度将有多快，默认值为2.0，相当于在60fps时每旋转一周需要30秒。
 controls.autoRotateSpeed = 0.1;
 // 你能够垂直旋转的角度的上限，范围是0到Math.PI，其默认值为Math.PI
-controls.maxPolarAngle = Math.PI / 3 * 2;
+// controls.maxPolarAngle = Math.PI / 3 * 2
 // 你能够垂直旋转的角度的下限，范围是0到Math.PI，其默认值为0。
-controls.minPolarAngle = Math.PI / 3 * 2;
+// controls.minPolarAngle = Math.PI / 3 * 2
+
+// 管理烟花
+var fireworks = [];
 var clock = new THREE.Clock();
 function animate(t) {
   var elapsedTime = clock.getElapsedTime();
   controls.update();
+
+  // 更新
+  fireworks.forEach(function (item) {
+    item.update();
+  });
 
   //   console.log(elapsedTime);
   requestAnimationFrame(animate);
@@ -48413,16 +48565,14 @@ function animate(t) {
 }
 animate();
 
-// 管理烟花
-var fireworks = [];
 // 设置创建烟花函数
 var createFireworks = function createFireworks() {
   // 颜色
   var color = "hsl(".concat(Math.floor(Math.random() * 360), ", 100%, 80%)");
   var position = {
     x: (Math.random() - 0.5) * 40,
-    z: (Math.random() - 0.5) * 40,
-    y: 7 + Math.random() * 25
+    z: -(Math.random() - 0.5) * 40,
+    y: 3 + Math.random() * 15
   };
 
   // 随机生成颜色和烟花放的位置
@@ -48459,7 +48609,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61144" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49376" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

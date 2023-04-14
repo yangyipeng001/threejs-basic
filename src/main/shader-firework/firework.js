@@ -7,6 +7,7 @@ import fireworksVertex from '../../shaders/fireworks/vertex.glsl'
 export default class Fireworks {
     constructor(color, to, from = {x: 0, y: 0, z: 0}) {
         // console.log('创建烟花：', color, to)
+        this.color = new THREE.Color(color)
 
         // 创建烟花发射的球点
         this.startGeometry = new THREE.BufferGeometry()
@@ -47,7 +48,10 @@ export default class Fireworks {
                 },
                 uSize: {
                     value: 20
-                }
+                },
+                uColor: {
+                    value: this.color
+                },
             }
         })
 
@@ -103,7 +107,10 @@ export default class Fireworks {
                 },
                 uSize: {
                     value: 0
-                }
+                },
+                uColor: {
+                    value: this.color
+                },
             },
             transparent: true,
             blending: THREE.AdditiveBlending,
@@ -115,6 +122,37 @@ export default class Fireworks {
         this.fireworks = new THREE.Points(
             this.fireworkGeometry,
             this.fireworksMaterial
+        )
+
+        // 创建音频
+        this.linstener = new THREE.AudioListener()
+        this.linstener1 = new THREE.AudioListener()
+        this.sound = new THREE.Audio(this.linstener)
+        this.sendSound = new THREE.Audio(this.linstener1)
+
+        // 创建音频加载器
+        const audioLoader = new THREE.AudioLoader()
+        audioLoader.load(
+            `./assets/audio/pow${Math.floor(Math.random() * 4 + 1)}.ogg`,
+            (buffer) => {
+                // 声音数据
+                this.sound.setBuffer(buffer)
+                // 循环
+                this.sound.setLoop(false)
+                // 音量
+                this.sound.setVolume(1)
+            }
+        )
+        audioLoader.load(
+            `./assets/audio/send.mp3`,
+            (buffer) => {
+                // 声音数据
+                this.sendSound.setBuffer(buffer)
+                // 循环
+                this.sendSound.setLoop(false)
+                // 音量
+                this.sendSound.setVolume(1)
+            }
         )
     }
 
@@ -130,11 +168,17 @@ export default class Fireworks {
         const elapsedTime = this.clock.getElapsedTime()
         // console.log(elapsedTime)
 
-        if (elapsedTime < 1) {
+        if (elapsedTime > 0.2 && elapsedTime < 1) {
+            // 声音是否在播放
+            if (!this.sendSound.isPlaying && !this.sendSoundPlay) {
+                this.sendSound.play()
+                this.sendSoundPlay = true
+            }
+
             this.startMaterial.uniforms.uTime.value = elapsedTime
             this.startMaterial.uniforms.uSize.value = 20.0
         }
-        else {
+        else if (elapsedTime > 0.2) {
             const time = elapsedTime - 1
 
             // 让元素消失
@@ -146,18 +190,30 @@ export default class Fireworks {
             // 清除材质
             this.startMaterial.dispose()
 
+            // 声音是否在播放
+            if (!this.sound.isPlaying && !this.play) {
+                this.sound.play()
+                this.play = true
+            }
+
             // 设置烟花显示
             this.fireworksMaterial.uniforms.uSize.value = 20
             this.fireworksMaterial.uniforms.uTime.value = time
 
             // 消失处理
             if (time > 5) {
+                this.fireworksMaterial.uniforms.uSize.value = 0
                 // 从内存中清除
                 this.fireworks.clear()
                 // 清除几何体
                 this.fireworkGeometry.dispose()
                 // 清除材质
                 this.fireworksMaterial.dispose()
+                // 从场景中移除
+                this.scene.remove(this.fireworks)
+                this.scene.remove(this.startPoint)
+
+                return 'remove'
             }
         }
     }

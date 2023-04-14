@@ -11,6 +11,10 @@ import {RGBELoader} from 'three/examples/jsm/loaders/RGBELoader'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import Fireworks from './firework'
 
+// 导入水模块
+import {Water} from 'three/examples/jsm/objects/Water2'
+
+
 // 创建gui对象
 const gui = new dat.GUI();
 
@@ -35,8 +39,8 @@ camera.updateProjectionMatrix();
 scene.add(camera);
 
 // 加入辅助轴，帮助我们查看3维坐标轴
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper(5);
+// scene.add(axesHelper);
 
 
 // 加载纹理
@@ -81,13 +85,31 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping
 renderer.toneMappingExposure = 0.1
 
 
-// 导入孔明灯
+// 导入古建筑场景
 const gLTFLoader = new GLTFLoader()
 let LightBox = null
+gLTFLoader.load('./assets/model/newyears_min.glb', (gltf) => {
+  console.log(gltf)
+  scene.add(gltf.scene)
+
+  // 创建水面
+  const waterGeometry = new THREE.PlaneGeometry(100, 100)
+  let water = new Water(
+    waterGeometry,
+    {
+      scale: 4,
+      textureWidth: 1024,
+      textureHeight: 1024,
+    }
+  )
+  water.position.y = 1
+  water.rotation.x = -Math.PI / 2
+  scene.add(water)
+})
 gLTFLoader.load('./assets/model/flyLight.glb', (gltf) => {
     // console.log('====gltf', gltf)
     // scene.add(gltf.scene)
-    LightBox = gltf.scene.children[1]
+    LightBox = gltf.scene.children[0]
     LightBox.material = shaderMaterial
 
     // 随机生成多个
@@ -159,8 +181,12 @@ function animate(t) {
   controls.update()
 
   // 更新
-  fireworks.forEach((item) => {
-    item.update()
+  fireworks.forEach((item, i) => {
+    const type = item.update()
+
+    if (type === 'remove') {
+      fireworks.splice(i, 1)
+    }
   })
 
   //   console.log(elapsedTime);

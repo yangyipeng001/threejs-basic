@@ -49942,31 +49942,29 @@ effectComposer.addPass(renderPass);
 
 // 点效果
 var dotScreenPass = new _DotScreenPass.DotScreenPass();
-// dotScreenPass.enabled = false;
+dotScreenPass.enabled = false;
 effectComposer.addPass(dotScreenPass);
 
 // 抗锯齿
-// const smaaPass = new SMAAPass();
-// effectComposer.addPass(smaaPass)
+var smaaPass = new _SMAAPass.SMAAPass();
+effectComposer.addPass(smaaPass);
 
 // 发光效果
-// const unrealBloomPass = new UnrealBloomPass();
-// effectComposer.addPass(unrealBloomPass)
-
-// const glitchPass = new GlitchPass();
-// effectComposer.addPass(glitchPass)
+var unrealBloomPass = new _UnrealBloomPass.UnrealBloomPass();
+effectComposer.addPass(unrealBloomPass);
+var glitchPass = new _GlitchPass.GlitchPass();
+effectComposer.addPass(glitchPass);
 
 // unrealBloomPass.exposure = 1;
-// renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// renderer.toneMappingExposure = 1;
-// unrealBloomPass.strength = 1;
-// unrealBloomPass.radius = 0;
-// unrealBloomPass.threshold = 1;
-
-// gui.add(renderer,'toneMappingExposure').min(0).max(2).step(0.01)
-// gui.add(unrealBloomPass,'strength').min(0).max(2).step(0.01)
-// gui.add(unrealBloomPass,'radius').min(0).max(2).step(0.01)
-// gui.add(unrealBloomPass,'threshold').min(0).max(2).step(0.01)
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
+unrealBloomPass.strength = 1;
+unrealBloomPass.radius = 0;
+unrealBloomPass.threshold = 1;
+gui.add(renderer, 'toneMappingExposure').min(0).max(2).step(0.01);
+gui.add(unrealBloomPass, 'strength').min(0).max(2).step(0.01);
+gui.add(unrealBloomPass, 'radius').min(0).max(2).step(0.01);
+gui.add(unrealBloomPass, 'threshold').min(0).max(2).step(0.01);
 
 // 监听屏幕大小改变的变化，设置渲染的尺寸
 window.addEventListener("resize", function () {

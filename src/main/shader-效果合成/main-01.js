@@ -122,9 +122,8 @@ effectComposer.addPass(smaaPass)
 const unrealBloomPass = new UnrealBloomPass();
 effectComposer.addPass(unrealBloomPass)
 
-// 屏幕闪动
-// const glitchPass = new GlitchPass();
-// effectComposer.addPass(glitchPass)
+const glitchPass = new GlitchPass();
+effectComposer.addPass(glitchPass)
 
 // unrealBloomPass.exposure = 1;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -138,61 +137,6 @@ gui.add(unrealBloomPass,'strength').min(0).max(2).step(0.01)
 gui.add(unrealBloomPass,'radius').min(0).max(2).step(0.01)
 gui.add(unrealBloomPass,'threshold').min(0).max(2).step(0.01)
 
-
-const colorParams = {
-  r: 0,
-  g: 0,
-  b: 0
-}
-
-// 着色器写渲染通道
-const shaderPass = new ShaderPass(
-  {
-    uniforms: {
-      tDiffuse: {
-        value: null
-      },
-      uColor: {
-        value: new THREE.Color(colorParams.r, colorParams.g, colorParams.b)
-      }
-    },
-
-    // 顶点着色器
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-
-    // 片元着色器
-    fragmentShader: `
-      varying vec2 vUv;
-      uniform sampler2D tDiffuse;
-      uniform vec3 uColor;
-      void main() {
-        vec4 color = texture2D(tDiffuse, vUv);
-        // color.r += 0.2;
-        color.xyz += uColor;
-        gl_FragColor = color;
-      }
-    `
-  }
-)
-
-effectComposer.addPass(shaderPass)
-
-
-gui.add(colorParams, 'r').min(-1).max(1).step(0.01).onChange((value) => {
-  shaderPass.uniforms.uColor.value.r = value
-})
-gui.add(colorParams, 'g').min(-1).max(1).step(0.01).onChange((value) => {
-  shaderPass.uniforms.uColor.value.g = value
-})
-gui.add(colorParams, 'b').min(-1).max(1).step(0.01).onChange((value) => {
-  shaderPass.uniforms.uColor.value.b = value
-})
 
 
 // 监听屏幕大小改变的变化，设置渲染的尺寸

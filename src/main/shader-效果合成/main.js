@@ -221,6 +221,9 @@ const techPass = new ShaderPass( {
     },
     uNormalMap: {
       value: null
+    },
+    uTime: {
+      value: 0
     }
   },
 
@@ -238,8 +241,13 @@ const techPass = new ShaderPass( {
     varying vec2 vUv;
     uniform sampler2D tDiffuse;
     uniform sampler2D uNormalMap;
+    uniform float uTime;
+
     void main() {
-      vec4 color = texture2D(tDiffuse, vUv);
+      vec2 newUv = vUv;
+      newUv += sin(newUv.x * 10.0 + uTime * 0.5) * 0.03;
+
+      vec4 color = texture2D(tDiffuse, newUv);
       vec4 normalColor = texture2D(uNormalMap, vUv);
 
       // 设置光线的角度
@@ -275,6 +283,7 @@ function animate(t) {
   requestAnimationFrame(animate);
   // 使用渲染器渲染相机看这个场景的内容渲染出来
   // renderer.render(scene, camera);
+  techPass.material.uniforms.uTime.value = time;
   effectComposer.render()
 }
 

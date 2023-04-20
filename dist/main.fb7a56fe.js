@@ -50022,12 +50022,15 @@ var techPass = new _ShaderPass.ShaderPass({
     },
     uNormalMap: {
       value: null
+    },
+    uTime: {
+      value: 0
     }
   },
   // 顶点着色器
   vertexShader: "\n    varying vec2 vUv;\n    void main() {\n      vUv = uv;\n      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n    }\n  ",
   // 片元着色器
-  fragmentShader: "\n    varying vec2 vUv;\n    uniform sampler2D tDiffuse;\n    uniform sampler2D uNormalMap;\n    void main() {\n      vec4 color = texture2D(tDiffuse, vUv);\n      vec4 normalColor = texture2D(uNormalMap, vUv);\n\n      // \u8BBE\u7F6E\u5149\u7EBF\u7684\u89D2\u5EA6\n      vec3 lightDirection = normalize(vec3(-5, 5, 2));\n\n      // clamp() \u524D\u7F6E\uFF0C\u8BA9\u4E00\u4E2A\u6570\u5904\u4E8E\u4E00\u4E2A\u8303\u56F4\n      float lightness = clamp(dot(normalColor.xyz, lightDirection), 0.0, 1.0);\n\n      color.xyz += lightness;\n\n      gl_FragColor = color;\n    }\n  "
+  fragmentShader: "\n    varying vec2 vUv;\n    uniform sampler2D tDiffuse;\n    uniform sampler2D uNormalMap;\n    uniform float uTime;\n\n    void main() {\n      vec2 newUv = vUv;\n      newUv += sin(newUv.x * 10.0 + uTime * 0.5) * 0.03;\n\n      vec4 color = texture2D(tDiffuse, newUv);\n      vec4 normalColor = texture2D(uNormalMap, vUv);\n\n      // \u8BBE\u7F6E\u5149\u7EBF\u7684\u89D2\u5EA6\n      vec3 lightDirection = normalize(vec3(-5, 5, 2));\n\n      // clamp() \u524D\u7F6E\uFF0C\u8BA9\u4E00\u4E2A\u6570\u5904\u4E8E\u4E00\u4E2A\u8303\u56F4\n      float lightness = clamp(dot(normalColor.xyz, lightDirection), 0.0, 1.0);\n\n      color.xyz += lightness;\n\n      gl_FragColor = color;\n    }\n  "
 });
 techPass.material.uniforms.uNormalMap.value = normalTexture;
 effectComposer.addPass(techPass);
@@ -50049,6 +50052,7 @@ function animate(t) {
   requestAnimationFrame(animate);
   // 使用渲染器渲染相机看这个场景的内容渲染出来
   // renderer.render(scene, camera);
+  techPass.material.uniforms.uTime.value = time;
   effectComposer.render();
 }
 animate();
@@ -50077,7 +50081,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62870" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59776" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

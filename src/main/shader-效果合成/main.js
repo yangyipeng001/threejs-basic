@@ -213,6 +213,51 @@ window.addEventListener("resize", () => {
 });
 
 
+const normalTexture = textureLoader.load('./textures/textures/interfaceNormalMap.png')
+const techPass = new ShaderPass( {
+  uniforms: {
+    tDiffuse: {
+      value: null
+    },
+    uNormalMap: {
+      value: null
+    }
+  },
+
+  // 顶点着色器
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+
+  // 片元着色器
+  fragmentShader: `
+    varying vec2 vUv;
+    uniform sampler2D tDiffuse;
+    uniform sampler2D uNormalMap;
+    void main() {
+      vec4 color = texture2D(tDiffuse, vUv);
+      vec4 normalColor = texture2D(uNormalMap, vUv);
+
+      // 设置光线的角度
+      vec3 lightDirection = normalize(vec3(-5, 5, 2));
+
+      // clamp() 前置，让一个数处于一个范围
+      float lightness = clamp(dot(normalColor.xyz, lightDirection), 0.0, 1.0);
+
+      color.xyz += lightness;
+
+      gl_FragColor = color;
+    }
+  `
+})
+techPass.material.uniforms.uNormalMap.value = normalTexture
+effectComposer.addPass(techPass)
+
+
 // 将渲染器添加到body
 document.body.appendChild(renderer.domElement);
 
